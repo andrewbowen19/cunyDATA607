@@ -6,35 +6,85 @@ output: html_document
 ---
 
 ## Introduction
-As a soccer fan, I've decided to use FiveThirtyEight's [2022 Club Soccer Predictions](https://projects.fivethirtyeight.com/soccer-predictions/). I'll be using their [club rankings data set](https://projects.fivethirtyeight.com/soccer-api/club/spi_global_rankings.csv) (also available on my [GitHub](https://raw.githubusercontent.com/andrewbowen19/cunyDATA607/main/data/spi_global_rankings.csv)) to see if the offenseive and defensive rating columns assigned by FiveThirtyEight are dependent on the league/name of a team. This dataset uses [ESPN's Soccer Power Index](https://fivethirtyeight.com/methodology/how-our-club-soccer-predictions-work/) to assign teams a universal rating to normalize across different leagues/playing conditions (home vs away, etc.). This metric can be used to forecast the outcome of matches/seasons for a club.
+As a soccer fan, I've decided to use FiveThirtyEight's [2022 Club Soccer Predictions](https://projects.fivethirtyeight.com/soccer-predictions/). I'll be using their [club rankings data set](https://projects.fivethirtyeight.com/soccer-api/club/spi_global_rankings.csv) (also available on my [GitHub](https://raw.githubusercontent.com/andrewbowen19/cunyDATA607/main/data/spi_global_rankings.csv)) to see if the offenseive and defensive rating columns assigned by FiveThirtyEight are dependent on the league/name of a team. This dataset uses [ESPN's Soccer Power Index](https://fivethirtyeight.com/methodology/how-our-club-soccer-predictions-work/) to assign teams a universal rating to normalize across different leagues/playing conditions (home vs away, etc.). This metric can be used to forecast the outcome of matches/seasons for a club. It also can be used to rank clubs from different leagues, where quality of play may differ.
 ```{r}
 library('dplyr')
 ```
 
 ```{r}
+# Read in our dataset hosted on GitHub
 url_path <- "https://raw.githubusercontent.com/andrewbowen19/cunyDATA607/main/data/spi_global_rankings.csv"
 df = read.csv(url_path, header=TRUE)
 
 head(df, 10)
 ```
-
+### Filtering our Dataset
+I'm primarily a fan of the Italian Serie A. I'd like to filter our dataset based on the `league` column to only include the rows of teams that play in Serie A
 ```{r}
-serie_a <- filter(df, league=="Italy Serie A")
+serie_a <- filter(df, league=="Italy Serie A") #| league=="Italy Serie B")
 
 serie_a
 ```
+### Dataset Measurements
 The `off` and `def` columns represent the average number of goals scored/conceded against an average team on a neutral field. I'd like to calculate an average goal differential column (goals scored - goals conceded). I'd also like to see the difference in a club's weekly ranking, given by our calculated `rank_diff` column (defined as $previous rank - new rank$)
 ```{r}
 df <- df %>% mutate(rank_diff = prev_rank - rank)
 df <- df %>% mutate(avg_diff = off - def)
 
-
 head(df, 10)
 ```
 
+### League Averages
+Want to see the average SPI metrics of each league included in our dataset. 
 ```{r}
 league_avgs <- df %>% group_by(league)
 
 league_avg_stats <- league_avgs %>% summarize(off=mean(off), def=mean(def), spi=mean(spi))
 league_avg_stats
 ```
+
+
+Sorting our league summary stats by SPI to get a sense of how the different leagues perform in terms of offensive, defensive, and SPI metrics. Sorting by SPI in order to see overall league performance according to this metric.
+```{r}
+league_avg_stats_sorted <- league_avg_stats %>% arrange(desc(spi))
+
+league_avg_stats_sorted
+```
+
+
+## Plots
+Plotting the offensive and defensive ratings. Using the `ggplot2` library.
+```{r}
+library('ggplot2')
+
+ggplot(df, aes(x=def, y=off)) + geom_point()
+```
+
+### Plotting by League
+Want to make the same plot as above but colored by league. This could be a way for us to see if there are any trends between leagues in terms of club offensive and defensive performance. We only want the [Big 5 Leagues](https://www.statista.com/topics/5909/-big-five/) (Premier League, Bundesliga, Serie A, Ligue 1, La Liga), otherwise the chart becomes a bit busy.
+```{r}
+# Filtering dataframe to the leagues we want
+big5 <- filter(df, league=="Italy Serie A" |
+                   league=="Barclays Premier League" |
+                   league=="German Bundesliga" | 
+                   league=="Spanish Primera Division" |
+                   league=="French Ligue 1"
+                 )
+
+ggplot(big5, aes(x=def, y=off, color=league)) + geom_point()
+```
+
+
+## Conclusion/Further Recommendations
+One exercise that could be interesting to do with this dataset would be to see if there are any bias based on league in the SPI rankings. For instance, using [European Tournaments](https://www.google.com/url?sa=t&rct=j&q=&esrc=s&source=web&cd=&cad=rja&uact=8&ved=2ahUKEwjLjIOJiO_5AhW2rIkEHbeLDLoQFnoECBoQAQ&url=https%3A%2F%2Fen.wikipedia.org%2Fwiki%2FUEFA_competitions&usg=AOvVaw1CuYv8n00lkc8PxWIHJycr), such as the UEFA Champions League or Europa League, could give insight into how leagues perform against each other. Discrepancies in how a league's clubs perform on average would show that the SPI ranking favors certain leagues/clubs, even if their performance against outside competition does not reflect their ranking. This could also be used to compare how well the SPI metric predicts the outcomes of matches between two teams (in European competitions or otherwise). One other idea would be to try to classify a team's league based on its offensive, defensive and SPI ratings.
+
+
+
+
+
+
+
+
+
+
+
