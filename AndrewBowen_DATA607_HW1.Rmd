@@ -1,0 +1,40 @@
+---
+title: "AndrewBowen_DATA607_HW1"
+author: "Andrew Bowen"
+date: "2022-08-30"
+output: html_document
+---
+
+## Introduction
+As a soccer fan, I've decided to use FiveThirtyEight's [2022 Club Soccer Predictions](https://projects.fivethirtyeight.com/soccer-predictions/). I'll be using their [club rankings data set](https://projects.fivethirtyeight.com/soccer-api/club/spi_global_rankings.csv) (also available on my [GitHub](https://raw.githubusercontent.com/andrewbowen19/cunyDATA607/main/data/spi_global_rankings.csv)) to see if the offenseive and defensive rating columns assigned by FiveThirtyEight are dependent on the league/name of a team. This dataset uses [ESPN's Soccer Power Index](https://fivethirtyeight.com/methodology/how-our-club-soccer-predictions-work/) to assign teams a universal rating to normalize across different leagues/playing conditions (home vs away, etc.). This metric can be used to forecast the outcome of matches/seasons for a club.
+```{r}
+library('dplyr')
+```
+
+```{r}
+url_path <- "https://raw.githubusercontent.com/andrewbowen19/cunyDATA607/main/data/spi_global_rankings.csv"
+df = read.csv(url_path, header=TRUE)
+
+head(df, 10)
+```
+
+```{r}
+serie_a <- filter(df, league=="Italy Serie A")
+
+serie_a
+```
+The `off` and `def` columns represent the average number of goals scored/conceded against an average team on a neutral field. I'd like to calculate an average goal differential column (goals scored - goals conceded). I'd also like to see the difference in a club's weekly ranking, given by our calculated `rank_diff` column (defined as $previous rank - new rank$)
+```{r}
+df <- df %>% mutate(rank_diff = prev_rank - rank)
+df <- df %>% mutate(avg_diff = off - def)
+
+
+head(df, 10)
+```
+
+```{r}
+league_avgs <- df %>% group_by(league)
+
+league_avg_stats <- league_avgs %>% summarize(off=mean(off), def=mean(def), spi=mean(spi))
+league_avg_stats
+```
