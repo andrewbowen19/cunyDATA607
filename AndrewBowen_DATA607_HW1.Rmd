@@ -1,5 +1,5 @@
 ---
-title: "AndrewBowen_DATA607_HW1"
+title: "Andrew Bowen DATA607 HW1"
 author: "Andrew Bowen"
 date: "2022-08-30"
 output: html_document
@@ -23,7 +23,10 @@ I'm primarily a fan of the Italian Serie A. I'd like to filter our dataset based
 ```{r}
 serie_a <- filter(df, league=="Italy Serie A") #| league=="Italy Serie B")
 
-serie_a
+# Can also use the subset function to filter our dataframe: https://www.r-bloggers.com/2011/11/r-101-the-subset-function/
+serieA <- subset(df, league=="Italy Serie A")
+
+serieA
 ```
 ### Dataset Measurements
 The `off` and `def` columns represent the average number of goals scored/conceded against an average team on a neutral field. I'd like to calculate an average goal differential column (goals scored - goals conceded). I'd also like to see the difference in a club's weekly ranking, given by our calculated `rank_diff` column (defined as $previous rank - new rank$)
@@ -73,6 +76,13 @@ big5 <- filter(df, league=="Italy Serie A" |
 
 ggplot(big5, aes(x=def, y=off, color=league)) + geom_point()
 ```
+
+### Plotting Just Serie A
+I want to see just the offensive vs defensive ratings for only Italian teams in Serie A (the top Italian league). The general trend (negative correlation) follows that of the overall visualization above, but the range of each variable is different for this case. For instance, the lowest defensive ratings (i.e. the average expected goals conceded) across all Big 5 leagues are between 0.3 and 0.4 goals, whereas in Serie A the lowest defensive rating is around 0.6. 
+```{r}
+ggplot(serieA, aes(x=def, y=off)) + geom_point()
+```
+
 
 
 ## Conclusion/Further Recommendations
