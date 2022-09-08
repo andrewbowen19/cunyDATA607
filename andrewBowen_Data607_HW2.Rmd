@@ -1,0 +1,12 @@
+---
+title: "Andrew Bowen DATA607 HW2"
+author: "Andrew Bowen"
+date: "2022-09-07"
+output: html_document
+---
+
+
+I collected my friends' ratings of 5 movies via [this Google Form](https://docs.google.com/forms/d/1IBOBrB3lPTibX4qGWMlQL9pzjw3SxxefF1eHyQxCG4U/edit#responses). I asked them to rate on a scale of 1-5 (1 being low rating, 5 being high) to rank *Shrek, The Godfather, Remember the Titans, Titanic & Anchorman*.
+```{r}
+
+```
