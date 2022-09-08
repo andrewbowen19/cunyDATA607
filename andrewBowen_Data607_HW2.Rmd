@@ -5,8 +5,53 @@ date: "2022-09-07"
 output: html_document
 ---
 
-
-I collected my friends' ratings of 5 movies via [this Google Form](https://docs.google.com/forms/d/1IBOBrB3lPTibX4qGWMlQL9pzjw3SxxefF1eHyQxCG4U/edit#responses). I asked them to rate on a scale of 1-5 (1 being low rating, 5 being high) to rank *Shrek, The Godfather, Remember the Titans, Titanic & Anchorman*.
+### Libraries
 ```{r}
-
+library('RMySQL')
+library('dplyr')
 ```
+
+## Data Collection
+I collected my friends' ratings of 5 movies via [this Google Form](https://docs.google.com/forms/d/1IBOBrB3lPTibX4qGWMlQL9pzjw3SxxefF1eHyQxCG4U/edit#responses). I asked them to rate on a scale of 1-5 (1 being low rating, 5 being high) to rank *Shrek, The Godfather, Remember the Titans, Titanic & Anchorman*. I exported the survey results to a csv file that can be viewed [here](https://raw.githubusercontent.com/andrewbowen19/cunyDATA607/main/data/move-rankings-survey.csv). I then was able to load this csv file into a Google Cloud-hosted database. The database *should* have IPs whitelisted to connect, but please reach out to me if not.
+
+
+Now we'll connect to our Google Cloud db instance in R itself. I learned a lot about these commands/processes from [this page](https://www.r-bloggers.com/2011/05/accessing-mysql-through-r/)
+
+
+
+
+```{r}
+pwd <- 'dataiscool'#Sys.getenv('google_db_password')
+
+print(pwd)
+conn = dbConnect(MySQL(), user='root', password=pwd, dbname='movies', host='34.133.39.230')
+conn
+```
+
+Listing tables in our cloud-hosted db
+```{r}
+dbListTables(conn)
+```
+
+## Querying our cloud-hosted database in R
+Now let's get the data from our `movie_ratings` table containing our survey data into a R dataframe
+```{r}
+my_query <- dbSendQuery(conn, "select * from movie_ratings")
+
+df <- fetch(my_query, n=-1)  # using n=-1 to retrieve all records
+df
+```
+
+## Data wrangling
+I don't love the '*Have not seen it*' tag present in our data, so why don't we replace that with None values (`NA`  in R). Let's also change our `rating_timestamp` column to a timestamp type.
+
+```{r}
+df <- df %>% replace(.=="Have not seen it", NA)
+
+df$rating_timestamp <- as.POSIXct(df$rating_timestamp, format="%m/%d/%Y %H:%M:%S", tz="")
+
+df
+```
+
+
+Now that we have the dataframe loaded into R, we can do whatever manipulation of the data we need :)
