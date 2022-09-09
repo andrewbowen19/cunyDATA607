@@ -12,18 +12,12 @@ library('dplyr')
 ```
 
 ## Data Collection
-I collected my friends' ratings of 5 movies via [this Google Form](https://docs.google.com/forms/d/1IBOBrB3lPTibX4qGWMlQL9pzjw3SxxefF1eHyQxCG4U/edit#responses). I asked them to rate on a scale of 1-5 (1 being low rating, 5 being high) to rank *Shrek, The Godfather, Remember the Titans, Titanic & Anchorman*. I exported the survey results to a csv file that can be viewed [here](https://raw.githubusercontent.com/andrewbowen19/cunyDATA607/main/data/move-rankings-survey.csv). I then was able to load this csv file into a Google Cloud-hosted database. The database *should* have IPs whitelisted to connect, but please reach out to me if not.
+I collected my friends' ratings of 5 movies via [this Google Form](https://docs.google.com/forms/d/1IBOBrB3lPTibX4qGWMlQL9pzjw3SxxefF1eHyQxCG4U/edit#responses). I asked them to rate on a scale of 1-5 (1 being low rating, 5 being high) to rank *Shrek, The Godfather, Remember the Titans, Titanic & Anchorman*. I exported the survey results to a csv file that can be viewed [here](https://raw.githubusercontent.com/andrewbowen19/cunyDATA607/main/data/move-rankings-survey.csv). I then was able to load this csv file into a Google Cloud-hosted database.
 
-
-Now we'll connect to our Google Cloud db instance in R itself. I learned a lot about these commands/processes from [this page](https://www.r-bloggers.com/2011/05/accessing-mysql-through-r/)
-
-
-
-
+Now we'll connect to our Google Cloud db instance in R itself. I learned a lot about these commands and the `RMySQL` library from [this page](https://www.r-bloggers.com/2011/05/accessing-mysql-through-r/). The db password is set as the `google_db_password` environment variable on my machine. It's included on my blackboard submission. 
 ```{r}
-pwd <- 'dataiscool'#Sys.getenv('google_db_password')
+pwd <- Sys.getenv("google_db_password") # Get db instance password
 
-print(pwd)
 conn = dbConnect(MySQL(), user='root', password=pwd, dbname='movies', host='34.133.39.230')
 conn
 ```

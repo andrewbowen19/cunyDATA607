@@ -392,16 +392,16 @@ rating, 5 being high) to rank <em>Shrek, The Godfather, Remember the
 Titans, Titanic &amp; Anchorman</em>. I exported the survey results to a
 csv file that can be viewed <a href="https://raw.githubusercontent.com/andrewbowen19/cunyDATA607/main/data/move-rankings-survey.csv">here</a>.
 I then was able to load this csv file into a Google Cloud-hosted
-database. The database <em>should</em> have IPs whitelisted to connect,
-but please reach out to me if not.</p>
+database.</p>
 <p>Now we’ll connect to our Google Cloud db instance in R itself. I
-learned a lot about these commands/processes from <a href="https://www.r-bloggers.com/2011/05/accessing-mysql-through-r/">this
-page</a></p>
-<pre class="r"><code>pwd &lt;- &#39;dataiscool&#39;#Sys.getenv(&#39;google_db_password&#39;)
+learned a lot about these commands and the <code>RMySQL</code> library
+from <a href="https://www.r-bloggers.com/2011/05/accessing-mysql-through-r/">this
+page</a>. The db password is set as the <code>google_db_password</code>
+environment variable on my machine. It’s included on my blackboard
+submission.</p>
+<pre class="r"><code>pwd &lt;- Sys.getenv(&quot;google_db_password&quot;) # Get db instance password
 
-print(pwd)</code></pre>
-<pre><code>## [1] &quot;dataiscool&quot;</code></pre>
-<pre class="r"><code>conn = dbConnect(MySQL(), user=&#39;root&#39;, password=pwd, dbname=&#39;movies&#39;, host=&#39;34.133.39.230&#39;)
+conn = dbConnect(MySQL(), user=&#39;root&#39;, password=pwd, dbname=&#39;movies&#39;, host=&#39;34.133.39.230&#39;)
 conn</code></pre>
 <pre><code>## &lt;MySQLConnection:0,0&gt;</code></pre>
 <p>Listing tables in our cloud-hosted db</p>
