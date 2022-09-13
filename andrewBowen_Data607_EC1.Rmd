@@ -1,0 +1,38 @@
+---
+title: 'Andrew Bowen Data 607 Extra Credit #1'
+author: "Andrew Bowen"
+date: "2022-09-12"
+output: html_document
+---
+
+# Extra Credit #1
+
+```{r}
+library('dplyr')
+
+```
+
+I found [this dataset](https://www.kaggle.com/datasets/sumanthvrao/daily-climate-time-series-data) containing daily climate measurements in Delhi, India from 1st January 2013 to 24th April 2017.
+```{r}
+# Reading in from GitHub
+data_url <- "https://raw.githubusercontent.com/andrewbowen19/cunyDATA607/main/data/DailyDelhiClimateTrain.csv"
+
+df <- read.csv(data_url, header=TRUE)
+
+head(df, 10)
+```
+
+First, we'll need to cast the `date` column to a date type.
+```{r}
+df$date <- as.Date(df$date, format = "%Y-%m-%d")
+head(df, 10)
+```
+Let's calculate the 6-day rolling average of each measurement first
+```{r}
+df <- df %>% 
+  group_by(date) %>%
+  mutate(meantemp_6day = cumsum(meantemp))
+
+head(df)
+```
+

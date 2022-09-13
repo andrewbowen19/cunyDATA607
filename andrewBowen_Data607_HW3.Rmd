@@ -1,0 +1,106 @@
+---
+title: "Andrew Bowen DATA 607 HW 3"
+author: "Andrew Bowen"
+date: "2022-09-13"
+output: html_document
+---
+# Homework Assignment 3: DATA607
+
+```{r}
+library('dplyr')
+library('tidyverse')
+```
+
+## Question 1
+Using [FiveThirtyEight's College major list](https://raw.githubusercontent.com/fivethirtyeight/data/master/college-majors/majors-list.csv)
+```{r}
+major_list_url <- "https://raw.githubusercontent.com/fivethirtyeight/data/master/college-majors/majors-list.csv"
+majors <- read.csv(major_list_url, header=TRUE, sep=",")
+
+majors
+```
+Using the `filter` function that comes with the `dplyr` package
+```{r}
+dplyr::filter(majors, grepl("DATA|STATISTICS", Major))
+```
+## Question 2
+```{r}
+initial_str <- '[1] "bell pepper"  "bilberry"     "blackberry"   "blood orange"
+[5] "blueberry"    "cantaloupe"   "chili pepper" "cloudberry"
+[9] "elderberry"   "lime"         "lychee"       "mulberry"
+[13] "olive"        "salal berry"'
+
+
+st <- str_extract_all(initial_str, "(bell pepper|bilberry|blackberry|blood orange|blueberry|cantaloupe|chili pepper|cloudberry|elderberry|lime|lychee|mulberry|olive|salal berry)")
+#st <- unlist(str_remove_all(initial_str, "\\s|\\[.\\]"))
+
+extracts <- unlist(st)
+extracts
+```
+
+## Question 3
+Describe, in words, what these expressions will match:
+
+`(.)\1\1`
+This expression will match for strings that have the same characterer repeated two times in a row (for example: l`oo`k). This comes from the double backreference `\1` refering to the capture group `(.)`
+```{r}
+pattern <- "(.)\1\1"
+str_view(fruit, pattern, match=TRUE)
+
+```
+
+`"(.)(.)\\2\\1"`
+This regex will match to any character groups that feature a 2-character group followed by it's "mirror" (e.g., `arra`y).
+```{r}
+str_view(fruit, "(.)(.)\\2\\1")
+```
+
+`(..)\1`
+This regex will match to a word with a 2-character sequence that is repeated
+```{r}
+str_view("FOFO", "(..)\1")
+```
+
+
+`"(.).\\1.\\1"`
+This regex will match to any letter that appears 3 times (hence the 2 back-references) within a word.
+
+```{r}
+str_view(fruit, "(.).\\1.\\1")
+```
+`"(.)(.)(.).*\\3\\2\\1"`
+This regex matches to strings that have a 3-character sequence that is "mirrored" later in the word. For example `rac`e`car`
+
+```{r}
+str_view(fruit, "(.)(.)(.).*\\3\\2\\1")
+```
+
+
+
+
+---
+## Question 4
+Match the first and last letter of a word if they are the same:
+```{r}
+test_str <- c("abba", "dancing", "queen", "waterloo", "chiquitita")
+
+str_view(test_str, "^(.).*\\1$")# "^(.).?\1$")
+```
+
+
+Contain a repeated pair of letters (e.g. "church" contains "ch" repeated twice.)
+```{r}
+# The letters don't have to be the same (i.e. 'ch'), so we can use a character range
+str_view(test_str, "([a-zA-Z][a-zA-z]).*\\1")
+```
+
+Contain one letter repeated in at least three places (e.g. "eleven" contains three "e"s.)
+```{r}
+# Using two capture group references to catch the same character two additional times
+str_view(test_str, "([a-zA-Z]{1})\\1\\1")
+```
+
+
+
+
+
