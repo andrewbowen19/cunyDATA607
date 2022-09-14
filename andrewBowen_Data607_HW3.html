@@ -1328,361 +1328,24 @@ pre code {
 <div id="question-1" class="section level2">
 <h2>Question 1</h2>
 <p>Using <a href="https://raw.githubusercontent.com/fivethirtyeight/data/master/college-majors/majors-list.csv">FiveThirtyEight’s
-College major list</a></p>
+College major list</a> csv file, pulling the datainto our
+<code>majors</code> dataframe straight from GitHub for
+reproducability.</p>
 <pre class="r"><code>major_list_url &lt;- &quot;https://raw.githubusercontent.com/fivethirtyeight/data/master/college-majors/majors-list.csv&quot;
 majors &lt;- read.csv(major_list_url, header=TRUE, sep=&quot;,&quot;)
 
-majors</code></pre>
-<pre><code>##     FOD1P                                                             Major
-## 1    1100                                               GENERAL AGRICULTURE
-## 2    1101                             AGRICULTURE PRODUCTION AND MANAGEMENT
-## 3    1102                                            AGRICULTURAL ECONOMICS
-## 4    1103                                                   ANIMAL SCIENCES
-## 5    1104                                                      FOOD SCIENCE
-## 6    1105                                        PLANT SCIENCE AND AGRONOMY
-## 7    1106                                                      SOIL SCIENCE
-## 8    1199                                         MISCELLANEOUS AGRICULTURE
-## 9    1302                                                          FORESTRY
-## 10   1303                                      NATURAL RESOURCES MANAGEMENT
-## 11   6000                                                         FINE ARTS
-## 12   6001                                            DRAMA AND THEATER ARTS
-## 13   6002                                                             MUSIC
-## 14   6003                                        VISUAL AND PERFORMING ARTS
-## 15   6004                                 COMMERCIAL ART AND GRAPHIC DESIGN
-## 16   6005                                  FILM VIDEO AND PHOTOGRAPHIC ARTS
-## 17   6007                                                       STUDIO ARTS
-## 18   6099                                           MISCELLANEOUS FINE ARTS
-## 19   1301                                             ENVIRONMENTAL SCIENCE
-## 20   3600                                                           BIOLOGY
-## 21   3601                                              BIOCHEMICAL SCIENCES
-## 22   3602                                                            BOTANY
-## 23   3603                                                 MOLECULAR BIOLOGY
-## 24   3604                                                           ECOLOGY
-## 25   3605                                                          GENETICS
-## 26   3606                                                      MICROBIOLOGY
-## 27   3607                                                      PHARMACOLOGY
-## 28   3608                                                        PHYSIOLOGY
-## 29   3609                                                           ZOOLOGY
-## 30   3611                                                      NEUROSCIENCE
-## 31   3699                                             MISCELLANEOUS BIOLOGY
-## 32   4006                               COGNITIVE SCIENCE AND BIOPSYCHOLOGY
-## 33   6200                                                  GENERAL BUSINESS
-## 34   6201                                                        ACCOUNTING
-## 35   6202                                                 ACTUARIAL SCIENCE
-## 36   6203                            BUSINESS MANAGEMENT AND ADMINISTRATION
-## 37   6204                               OPERATIONS LOGISTICS AND E-COMMERCE
-## 38   6205                                                BUSINESS ECONOMICS
-## 39   6206                                  MARKETING AND MARKETING RESEARCH
-## 40   6207                                                           FINANCE
-## 41   6209                          HUMAN RESOURCES AND PERSONNEL MANAGEMENT
-## 42   6210                                            INTERNATIONAL BUSINESS
-## 43   6211                                            HOSPITALITY MANAGEMENT
-## 44   6212                     MANAGEMENT INFORMATION SYSTEMS AND STATISTICS
-## 45   6299                   MISCELLANEOUS BUSINESS &amp; MEDICAL ADMINISTRATION
-## 46   1901                                                    COMMUNICATIONS
-## 47   1902                                                        JOURNALISM
-## 48   1903                                                        MASS MEDIA
-## 49   1904                                  ADVERTISING AND PUBLIC RELATIONS
-## 50   2001                                        COMMUNICATION TECHNOLOGIES
-## 51   2100                                  COMPUTER AND INFORMATION SYSTEMS
-## 52   2101                          COMPUTER PROGRAMMING AND DATA PROCESSING
-## 53   2102                                                  COMPUTER SCIENCE
-## 54   2105                                              INFORMATION SCIENCES
-## 55   2106                   COMPUTER ADMINISTRATION MANAGEMENT AND SECURITY
-## 56   2107                        COMPUTER NETWORKING AND TELECOMMUNICATIONS
-## 57   3700                                                       MATHEMATICS
-## 58   3701                                               APPLIED MATHEMATICS
-## 59   3702                                   STATISTICS AND DECISION SCIENCE
-## 60   4005                                  MATHEMATICS AND COMPUTER SCIENCE
-## 61   2300                                                 GENERAL EDUCATION
-## 62   2301                        EDUCATIONAL ADMINISTRATION AND SUPERVISION
-## 63   2303                                         SCHOOL STUDENT COUNSELING
-## 64   2304                                              ELEMENTARY EDUCATION
-## 65   2305                                     MATHEMATICS TEACHER EDUCATION
-## 66   2306                            PHYSICAL AND HEALTH EDUCATION TEACHING
-## 67   2307                                         EARLY CHILDHOOD EDUCATION
-## 68   2308                            SCIENCE AND COMPUTER TEACHER EDUCATION
-## 69   2309                                       SECONDARY TEACHER EDUCATION
-## 70   2310                                           SPECIAL NEEDS EDUCATION
-## 71   2311                       SOCIAL SCIENCE OR HISTORY TEACHER EDUCATION
-## 72   2312                                TEACHER EDUCATION: MULTIPLE LEVELS
-## 73   2313                                      LANGUAGE AND DRAMA EDUCATION
-## 74   2314                                           ART AND MUSIC EDUCATION
-## 75   2399                                           MISCELLANEOUS EDUCATION
-## 76   3501                                                   LIBRARY SCIENCE
-## 77   1401                                                      ARCHITECTURE
-## 78   2400                                               GENERAL ENGINEERING
-## 79   2401                                             AEROSPACE ENGINEERING
-## 80   2402                                            BIOLOGICAL ENGINEERING
-## 81   2403                                         ARCHITECTURAL ENGINEERING
-## 82   2404                                            BIOMEDICAL ENGINEERING
-## 83   2405                                              CHEMICAL ENGINEERING
-## 84   2406                                                 CIVIL ENGINEERING
-## 85   2407                                              COMPUTER ENGINEERING
-## 86   2408                                            ELECTRICAL ENGINEERING
-## 87   2409                         ENGINEERING MECHANICS PHYSICS AND SCIENCE
-## 88   2410                                         ENVIRONMENTAL ENGINEERING
-## 89   2411                            GEOLOGICAL AND GEOPHYSICAL ENGINEERING
-## 90   2412                          INDUSTRIAL AND MANUFACTURING ENGINEERING
-## 91   2413                       MATERIALS ENGINEERING AND MATERIALS SCIENCE
-## 92   2414                                            MECHANICAL ENGINEERING
-## 93   2415                                         METALLURGICAL ENGINEERING
-## 94   2416                                    MINING AND MINERAL ENGINEERING
-## 95   2417                         NAVAL ARCHITECTURE AND MARINE ENGINEERING
-## 96   2418                                               NUCLEAR ENGINEERING
-## 97   2419                                             PETROLEUM ENGINEERING
-## 98   2499                                         MISCELLANEOUS ENGINEERING
-## 99   2500                                          ENGINEERING TECHNOLOGIES
-## 100  2501                             ENGINEERING AND INDUSTRIAL MANAGEMENT
-## 101  2502                                 ELECTRICAL ENGINEERING TECHNOLOGY
-## 102  2503                                INDUSTRIAL PRODUCTION TECHNOLOGIES
-## 103  2504                       MECHANICAL ENGINEERING RELATED TECHNOLOGIES
-## 104  2599                            MISCELLANEOUS ENGINEERING TECHNOLOGIES
-## 105  5008                                                 MATERIALS SCIENCE
-## 106  4002                                                NUTRITION SCIENCES
-## 107  6100                               GENERAL MEDICAL AND HEALTH SERVICES
-## 108  6102                     COMMUNICATION DISORDERS SCIENCES AND SERVICES
-## 109  6103                        HEALTH AND MEDICAL ADMINISTRATIVE SERVICES
-## 110  6104                                        MEDICAL ASSISTING SERVICES
-## 111  6105                                  MEDICAL TECHNOLOGIES TECHNICIANS
-## 112  6106                           HEALTH AND MEDICAL PREPARATORY PROGRAMS
-## 113  6107                                                           NURSING
-## 114  6108               PHARMACY PHARMACEUTICAL SCIENCES AND ADMINISTRATION
-## 115  6109                                     TREATMENT THERAPY PROFESSIONS
-## 116  6110                                       COMMUNITY AND PUBLIC HEALTH
-## 117  6199                          MISCELLANEOUS HEALTH MEDICAL PROFESSIONS
-## 118  1501                              AREA ETHNIC AND CIVILIZATION STUDIES
-## 119  2601               LINGUISTICS AND COMPARATIVE LANGUAGE AND LITERATURE
-## 120  2602     FRENCH GERMAN LATIN AND OTHER COMMON FOREIGN LANGUAGE STUDIES
-## 121  2603                                           OTHER FOREIGN LANGUAGES
-## 122  3301                                   ENGLISH LANGUAGE AND LITERATURE
-## 123  3302                                          COMPOSITION AND RHETORIC
-## 124  3401                                                      LIBERAL ARTS
-## 125  3402                                                        HUMANITIES
-## 126  4001                           INTERCULTURAL AND INTERNATIONAL STUDIES
-## 127  4801                                  PHILOSOPHY AND RELIGIOUS STUDIES
-## 128  4901                                  THEOLOGY AND RELIGIOUS VOCATIONS
-## 129  5502                                       ANTHROPOLOGY AND ARCHEOLOGY
-## 130  6006                                         ART HISTORY AND CRITICISM
-## 131  6402                                                           HISTORY
-## 132  6403                                             UNITED STATES HISTORY
-## 133  2201                            COSMETOLOGY SERVICES AND CULINARY ARTS
-## 134  2901                                      FAMILY AND CONSUMER SCIENCES
-## 135  3801                                             MILITARY TECHNOLOGIES
-## 136  4101                     PHYSICAL FITNESS PARKS RECREATION AND LEISURE
-## 137  5601                                             CONSTRUCTION SERVICES
-## 138  5701 ELECTRICAL, MECHANICAL, AND PRECISION TECHNOLOGIES AND PRODUCTION
-## 139  5901                          TRANSPORTATION SCIENCES AND TECHNOLOGIES
-## 140  4000                                   MULTI/INTERDISCIPLINARY STUDIES
-## 141  3201                                                   COURT REPORTING
-## 142  3202                                         PRE-LAW AND LEGAL STUDIES
-## 143  5301                              CRIMINAL JUSTICE AND FIRE PROTECTION
-## 144  5401                                             PUBLIC ADMINISTRATION
-## 145  5402                                                     PUBLIC POLICY
-## 146 bbbb                                  N/A (less than bachelor&#39;s degree)
-## 147  5000                                                 PHYSICAL SCIENCES
-## 148  5001                                        ASTRONOMY AND ASTROPHYSICS
-## 149  5002                              ATMOSPHERIC SCIENCES AND METEOROLOGY
-## 150  5003                                                         CHEMISTRY
-## 151  5004                                         GEOLOGY AND EARTH SCIENCE
-## 152  5005                                                       GEOSCIENCES
-## 153  5006                                                      OCEANOGRAPHY
-## 154  5007                                                           PHYSICS
-## 155  5098                             MULTI-DISCIPLINARY OR GENERAL SCIENCE
-## 156  5102        NUCLEAR, INDUSTRIAL RADIOLOGY, AND BIOLOGICAL TECHNOLOGIES
-## 157  5200                                                        PSYCHOLOGY
-## 158  5201                                            EDUCATIONAL PSYCHOLOGY
-## 159  5202                                               CLINICAL PSYCHOLOGY
-## 160  5203                                             COUNSELING PSYCHOLOGY
-## 161  5205                          INDUSTRIAL AND ORGANIZATIONAL PSYCHOLOGY
-## 162  5206                                                 SOCIAL PSYCHOLOGY
-## 163  5299                                          MISCELLANEOUS PSYCHOLOGY
-## 164  5403                         HUMAN SERVICES AND COMMUNITY ORGANIZATION
-## 165  5404                                                       SOCIAL WORK
-## 166  4007                                 INTERDISCIPLINARY SOCIAL SCIENCES
-## 167  5500                                           GENERAL SOCIAL SCIENCES
-## 168  5501                                                         ECONOMICS
-## 169  5503                                                       CRIMINOLOGY
-## 170  5504                                                         GEOGRAPHY
-## 171  5505                                           INTERNATIONAL RELATIONS
-## 172  5506                                  POLITICAL SCIENCE AND GOVERNMENT
-## 173  5507                                                         SOCIOLOGY
-## 174  5599                                     MISCELLANEOUS SOCIAL SCIENCES
-##                          Major_Category
-## 1       Agriculture &amp; Natural Resources
-## 2       Agriculture &amp; Natural Resources
-## 3       Agriculture &amp; Natural Resources
-## 4       Agriculture &amp; Natural Resources
-## 5       Agriculture &amp; Natural Resources
-## 6       Agriculture &amp; Natural Resources
-## 7       Agriculture &amp; Natural Resources
-## 8       Agriculture &amp; Natural Resources
-## 9       Agriculture &amp; Natural Resources
-## 10      Agriculture &amp; Natural Resources
-## 11                                 Arts
-## 12                                 Arts
-## 13                                 Arts
-## 14                                 Arts
-## 15                                 Arts
-## 16                                 Arts
-## 17                                 Arts
-## 18                                 Arts
-## 19               Biology &amp; Life Science
-## 20               Biology &amp; Life Science
-## 21               Biology &amp; Life Science
-## 22               Biology &amp; Life Science
-## 23               Biology &amp; Life Science
-## 24               Biology &amp; Life Science
-## 25               Biology &amp; Life Science
-## 26               Biology &amp; Life Science
-## 27               Biology &amp; Life Science
-## 28               Biology &amp; Life Science
-## 29               Biology &amp; Life Science
-## 30               Biology &amp; Life Science
-## 31               Biology &amp; Life Science
-## 32               Biology &amp; Life Science
-## 33                             Business
-## 34                             Business
-## 35                             Business
-## 36                             Business
-## 37                             Business
-## 38                             Business
-## 39                             Business
-## 40                             Business
-## 41                             Business
-## 42                             Business
-## 43                             Business
-## 44                             Business
-## 45                             Business
-## 46          Communications &amp; Journalism
-## 47          Communications &amp; Journalism
-## 48          Communications &amp; Journalism
-## 49          Communications &amp; Journalism
-## 50              Computers &amp; Mathematics
-## 51              Computers &amp; Mathematics
-## 52              Computers &amp; Mathematics
-## 53              Computers &amp; Mathematics
-## 54              Computers &amp; Mathematics
-## 55              Computers &amp; Mathematics
-## 56              Computers &amp; Mathematics
-## 57              Computers &amp; Mathematics
-## 58              Computers &amp; Mathematics
-## 59              Computers &amp; Mathematics
-## 60              Computers &amp; Mathematics
-## 61                            Education
-## 62                            Education
-## 63                            Education
-## 64                            Education
-## 65                            Education
-## 66                            Education
-## 67                            Education
-## 68                            Education
-## 69                            Education
-## 70                            Education
-## 71                            Education
-## 72                            Education
-## 73                            Education
-## 74                            Education
-## 75                            Education
-## 76                            Education
-## 77                          Engineering
-## 78                          Engineering
-## 79                          Engineering
-## 80                          Engineering
-## 81                          Engineering
-## 82                          Engineering
-## 83                          Engineering
-## 84                          Engineering
-## 85                          Engineering
-## 86                          Engineering
-## 87                          Engineering
-## 88                          Engineering
-## 89                          Engineering
-## 90                          Engineering
-## 91                          Engineering
-## 92                          Engineering
-## 93                          Engineering
-## 94                          Engineering
-## 95                          Engineering
-## 96                          Engineering
-## 97                          Engineering
-## 98                          Engineering
-## 99                          Engineering
-## 100                         Engineering
-## 101                         Engineering
-## 102                         Engineering
-## 103                         Engineering
-## 104                         Engineering
-## 105                         Engineering
-## 106                              Health
-## 107                              Health
-## 108                              Health
-## 109                              Health
-## 110                              Health
-## 111                              Health
-## 112                              Health
-## 113                              Health
-## 114                              Health
-## 115                              Health
-## 116                              Health
-## 117                              Health
-## 118           Humanities &amp; Liberal Arts
-## 119           Humanities &amp; Liberal Arts
-## 120           Humanities &amp; Liberal Arts
-## 121           Humanities &amp; Liberal Arts
-## 122           Humanities &amp; Liberal Arts
-## 123           Humanities &amp; Liberal Arts
-## 124           Humanities &amp; Liberal Arts
-## 125           Humanities &amp; Liberal Arts
-## 126           Humanities &amp; Liberal Arts
-## 127           Humanities &amp; Liberal Arts
-## 128           Humanities &amp; Liberal Arts
-## 129           Humanities &amp; Liberal Arts
-## 130           Humanities &amp; Liberal Arts
-## 131           Humanities &amp; Liberal Arts
-## 132           Humanities &amp; Liberal Arts
-## 133 Industrial Arts &amp; Consumer Services
-## 134 Industrial Arts &amp; Consumer Services
-## 135 Industrial Arts &amp; Consumer Services
-## 136 Industrial Arts &amp; Consumer Services
-## 137 Industrial Arts &amp; Consumer Services
-## 138 Industrial Arts &amp; Consumer Services
-## 139 Industrial Arts &amp; Consumer Services
-## 140                   Interdisciplinary
-## 141                 Law &amp; Public Policy
-## 142                 Law &amp; Public Policy
-## 143                 Law &amp; Public Policy
-## 144                 Law &amp; Public Policy
-## 145                 Law &amp; Public Policy
-## 146                                &lt;NA&gt;
-## 147                   Physical Sciences
-## 148                   Physical Sciences
-## 149                   Physical Sciences
-## 150                   Physical Sciences
-## 151                   Physical Sciences
-## 152                   Physical Sciences
-## 153                   Physical Sciences
-## 154                   Physical Sciences
-## 155                   Physical Sciences
-## 156                   Physical Sciences
-## 157            Psychology &amp; Social Work
-## 158            Psychology &amp; Social Work
-## 159            Psychology &amp; Social Work
-## 160            Psychology &amp; Social Work
-## 161            Psychology &amp; Social Work
-## 162            Psychology &amp; Social Work
-## 163            Psychology &amp; Social Work
-## 164            Psychology &amp; Social Work
-## 165            Psychology &amp; Social Work
-## 166                      Social Science
-## 167                      Social Science
-## 168                      Social Science
-## 169                      Social Science
-## 170                      Social Science
-## 171                      Social Science
-## 172                      Social Science
-## 173                      Social Science
-## 174                      Social Science</code></pre>
+head(majors, 10)</code></pre>
+<pre><code>##    FOD1P                                 Major                  Major_Category
+## 1   1100                   GENERAL AGRICULTURE Agriculture &amp; Natural Resources
+## 2   1101 AGRICULTURE PRODUCTION AND MANAGEMENT Agriculture &amp; Natural Resources
+## 3   1102                AGRICULTURAL ECONOMICS Agriculture &amp; Natural Resources
+## 4   1103                       ANIMAL SCIENCES Agriculture &amp; Natural Resources
+## 5   1104                          FOOD SCIENCE Agriculture &amp; Natural Resources
+## 6   1105            PLANT SCIENCE AND AGRONOMY Agriculture &amp; Natural Resources
+## 7   1106                          SOIL SCIENCE Agriculture &amp; Natural Resources
+## 8   1199             MISCELLANEOUS AGRICULTURE Agriculture &amp; Natural Resources
+## 9   1302                              FORESTRY Agriculture &amp; Natural Resources
+## 10  1303          NATURAL RESOURCES MANAGEMENT Agriculture &amp; Natural Resources</code></pre>
 <p>Using the <code>filter</code> function that comes with the
 <code>dplyr</code> package</p>
 <pre class="r"><code>dplyr::filter(majors, grepl(&quot;DATA|STATISTICS&quot;, Major))</code></pre>
@@ -1716,31 +1379,21 @@ the same characterer repeated two times in a row (for example:
 l<code>oo</code>k). This comes from the double backreference
 <code>\1</code> refering to the capture group <code>(.)</code></p>
 <pre class="r"><code>pattern &lt;- &quot;(.)\1\1&quot;
-str_view(fruit, pattern, match=TRUE)</code></pre>
-<div id="htmlwidget-71251d90dae229357a12" style="width:960px;height:100%;" class="str_view html-widget"></div>
-<script type="application/json" data-for="htmlwidget-71251d90dae229357a12">{"x":{"html":"<ul>\n  <li><\/li>\n<\/ul>"},"evals":[],"jsHooks":[]}</script>
+# str_view(fruit, pattern, match=TRUE)</code></pre>
 <p><code>&quot;(.)(.)\\2\\1&quot;</code> This regex will match to any character
 groups that feature a 2-character group followed by it’s “mirror” (e.g.,
 <code>arra</code>y).</p>
-<pre class="r"><code>str_view(fruit, &quot;(.)(.)\\2\\1&quot;)</code></pre>
-<div id="htmlwidget-34882d6df2984819cc3a" style="width:960px;height:100%;" class="str_view html-widget"></div>
-<script type="application/json" data-for="htmlwidget-34882d6df2984819cc3a">{"x":{"html":"<ul>\n  <li>apple<\/li>\n  <li>apricot<\/li>\n  <li>avocado<\/li>\n  <li>banana<\/li>\n  <li>bell p<span class='match'>eppe<\/span>r<\/li>\n  <li>bilberry<\/li>\n  <li>blackberry<\/li>\n  <li>blackcurrant<\/li>\n  <li>blood orange<\/li>\n  <li>blueberry<\/li>\n  <li>boysenberry<\/li>\n  <li>breadfruit<\/li>\n  <li>canary melon<\/li>\n  <li>cantaloupe<\/li>\n  <li>cherimoya<\/li>\n  <li>cherry<\/li>\n  <li>chili p<span class='match'>eppe<\/span>r<\/li>\n  <li>clementine<\/li>\n  <li>cloudberry<\/li>\n  <li>coconut<\/li>\n  <li>cranberry<\/li>\n  <li>cucumber<\/li>\n  <li>currant<\/li>\n  <li>damson<\/li>\n  <li>date<\/li>\n  <li>dragonfruit<\/li>\n  <li>durian<\/li>\n  <li>eggplant<\/li>\n  <li>elderberry<\/li>\n  <li>feijoa<\/li>\n  <li>fig<\/li>\n  <li>goji berry<\/li>\n  <li>gooseberry<\/li>\n  <li>grape<\/li>\n  <li>grapefruit<\/li>\n  <li>guava<\/li>\n  <li>honeydew<\/li>\n  <li>huckleberry<\/li>\n  <li>jackfruit<\/li>\n  <li>jambul<\/li>\n  <li>jujube<\/li>\n  <li>kiwi fruit<\/li>\n  <li>kumquat<\/li>\n  <li>lemon<\/li>\n  <li>lime<\/li>\n  <li>loquat<\/li>\n  <li>lychee<\/li>\n  <li>mandarine<\/li>\n  <li>mango<\/li>\n  <li>mulberry<\/li>\n  <li>nectarine<\/li>\n  <li>nut<\/li>\n  <li>olive<\/li>\n  <li>orange<\/li>\n  <li>pamelo<\/li>\n  <li>papaya<\/li>\n  <li>passionfruit<\/li>\n  <li>peach<\/li>\n  <li>pear<\/li>\n  <li>persimmon<\/li>\n  <li>physalis<\/li>\n  <li>pineapple<\/li>\n  <li>plum<\/li>\n  <li>pomegranate<\/li>\n  <li>pomelo<\/li>\n  <li>purple mangosteen<\/li>\n  <li>quince<\/li>\n  <li>raisin<\/li>\n  <li>rambutan<\/li>\n  <li>raspberry<\/li>\n  <li>redcurrant<\/li>\n  <li>rock melon<\/li>\n  <li>salal berry<\/li>\n  <li>satsuma<\/li>\n  <li>star fruit<\/li>\n  <li>strawberry<\/li>\n  <li>tamarillo<\/li>\n  <li>tangerine<\/li>\n  <li>ugli fruit<\/li>\n  <li>watermelon<\/li>\n<\/ul>"},"evals":[],"jsHooks":[]}</script>
+<pre class="r"><code># str_view(fruit, &quot;(.)(.)\\2\\1&quot;)</code></pre>
 <p><code>(..)\1</code> This regex will match to a word with a
 2-character sequence that is repeated</p>
-<pre class="r"><code>str_view(&quot;FOFO&quot;, &quot;(..)\1&quot;)</code></pre>
-<div id="htmlwidget-d8407a133e819872e0fd" style="width:960px;height:100%;" class="str_view html-widget"></div>
-<script type="application/json" data-for="htmlwidget-d8407a133e819872e0fd">{"x":{"html":"<ul>\n  <li>FOFO<\/li>\n<\/ul>"},"evals":[],"jsHooks":[]}</script>
+<pre class="r"><code># str_view(&quot;FOFO&quot;, &quot;(..)\1&quot;)</code></pre>
 <p><code>&quot;(.).\\1.\\1&quot;</code> This regex will match to any letter that
 appears 3 times (hence the 2 back-references) within a word.</p>
-<pre class="r"><code>str_view(fruit, &quot;(.).\\1.\\1&quot;)</code></pre>
-<div id="htmlwidget-8133ce7dd9bbc56d4c3a" style="width:960px;height:100%;" class="str_view html-widget"></div>
-<script type="application/json" data-for="htmlwidget-8133ce7dd9bbc56d4c3a">{"x":{"html":"<ul>\n  <li>apple<\/li>\n  <li>apricot<\/li>\n  <li>avocado<\/li>\n  <li>b<span class='match'>anana<\/span><\/li>\n  <li>bell pepper<\/li>\n  <li>bilberry<\/li>\n  <li>blackberry<\/li>\n  <li>blackcurrant<\/li>\n  <li>blood orange<\/li>\n  <li>blueberry<\/li>\n  <li>boysenberry<\/li>\n  <li>breadfruit<\/li>\n  <li>canary melon<\/li>\n  <li>cantaloupe<\/li>\n  <li>cherimoya<\/li>\n  <li>cherry<\/li>\n  <li>chili pepper<\/li>\n  <li>clementine<\/li>\n  <li>cloudberry<\/li>\n  <li>coconut<\/li>\n  <li>cranberry<\/li>\n  <li>cucumber<\/li>\n  <li>currant<\/li>\n  <li>damson<\/li>\n  <li>date<\/li>\n  <li>dragonfruit<\/li>\n  <li>durian<\/li>\n  <li>eggplant<\/li>\n  <li>elderberry<\/li>\n  <li>feijoa<\/li>\n  <li>fig<\/li>\n  <li>goji berry<\/li>\n  <li>gooseberry<\/li>\n  <li>grape<\/li>\n  <li>grapefruit<\/li>\n  <li>guava<\/li>\n  <li>honeydew<\/li>\n  <li>huckleberry<\/li>\n  <li>jackfruit<\/li>\n  <li>jambul<\/li>\n  <li>jujube<\/li>\n  <li>kiwi fruit<\/li>\n  <li>kumquat<\/li>\n  <li>lemon<\/li>\n  <li>lime<\/li>\n  <li>loquat<\/li>\n  <li>lychee<\/li>\n  <li>mandarine<\/li>\n  <li>mango<\/li>\n  <li>mulberry<\/li>\n  <li>nectarine<\/li>\n  <li>nut<\/li>\n  <li>olive<\/li>\n  <li>orange<\/li>\n  <li>pamelo<\/li>\n  <li>p<span class='match'>apaya<\/span><\/li>\n  <li>passionfruit<\/li>\n  <li>peach<\/li>\n  <li>pear<\/li>\n  <li>persimmon<\/li>\n  <li>physalis<\/li>\n  <li>pineapple<\/li>\n  <li>plum<\/li>\n  <li>pomegranate<\/li>\n  <li>pomelo<\/li>\n  <li>purple mangosteen<\/li>\n  <li>quince<\/li>\n  <li>raisin<\/li>\n  <li>rambutan<\/li>\n  <li>raspberry<\/li>\n  <li>redcurrant<\/li>\n  <li>rock melon<\/li>\n  <li>salal berry<\/li>\n  <li>satsuma<\/li>\n  <li>star fruit<\/li>\n  <li>strawberry<\/li>\n  <li>tamarillo<\/li>\n  <li>tangerine<\/li>\n  <li>ugli fruit<\/li>\n  <li>watermelon<\/li>\n<\/ul>"},"evals":[],"jsHooks":[]}</script>
+<pre class="r"><code># str_view(fruit, &quot;(.).\\1.\\1&quot;)</code></pre>
 <p><code>&quot;(.)(.)(.).*\\3\\2\\1&quot;</code> This regex matches to strings
 that have a 3-character sequence that is “mirrored” later in the word.
 For example <code>rac</code>e<code>car</code></p>
-<pre class="r"><code>str_view(fruit, &quot;(.)(.)(.).*\\3\\2\\1&quot;)</code></pre>
-<div id="htmlwidget-21af141cdd5d24b1fda9" style="width:960px;height:100%;" class="str_view html-widget"></div>
-<script type="application/json" data-for="htmlwidget-21af141cdd5d24b1fda9">{"x":{"html":"<ul>\n  <li>apple<\/li>\n  <li>apricot<\/li>\n  <li>avocado<\/li>\n  <li>banana<\/li>\n  <li>bell pepper<\/li>\n  <li>bilberry<\/li>\n  <li>blackberry<\/li>\n  <li>blackcurrant<\/li>\n  <li>blood orange<\/li>\n  <li>blueberry<\/li>\n  <li>boysenberry<\/li>\n  <li>breadfruit<\/li>\n  <li>canary melon<\/li>\n  <li>cantaloupe<\/li>\n  <li>cherimoya<\/li>\n  <li>cherry<\/li>\n  <li>chili pepper<\/li>\n  <li>clementine<\/li>\n  <li>cloudberry<\/li>\n  <li>coconut<\/li>\n  <li>cranberry<\/li>\n  <li>cucumber<\/li>\n  <li>currant<\/li>\n  <li>damson<\/li>\n  <li>date<\/li>\n  <li>dragonfruit<\/li>\n  <li>durian<\/li>\n  <li>eggplant<\/li>\n  <li>elderberry<\/li>\n  <li>feijoa<\/li>\n  <li>fig<\/li>\n  <li>goji berry<\/li>\n  <li>gooseberry<\/li>\n  <li>grape<\/li>\n  <li>grapefruit<\/li>\n  <li>guava<\/li>\n  <li>honeydew<\/li>\n  <li>huckleberry<\/li>\n  <li>jackfruit<\/li>\n  <li>jambul<\/li>\n  <li>jujube<\/li>\n  <li>kiwi fruit<\/li>\n  <li>kumquat<\/li>\n  <li>lemon<\/li>\n  <li>lime<\/li>\n  <li>loquat<\/li>\n  <li>lychee<\/li>\n  <li>mandarine<\/li>\n  <li>mango<\/li>\n  <li>mulberry<\/li>\n  <li>nectarine<\/li>\n  <li>nut<\/li>\n  <li>olive<\/li>\n  <li>orange<\/li>\n  <li>pamelo<\/li>\n  <li>papaya<\/li>\n  <li>passionfruit<\/li>\n  <li>peach<\/li>\n  <li>pear<\/li>\n  <li>persimmon<\/li>\n  <li>physalis<\/li>\n  <li>pineapple<\/li>\n  <li>plum<\/li>\n  <li>pomegranate<\/li>\n  <li>pomelo<\/li>\n  <li>purple mangosteen<\/li>\n  <li>quince<\/li>\n  <li>raisin<\/li>\n  <li>rambutan<\/li>\n  <li>raspberry<\/li>\n  <li>redcurrant<\/li>\n  <li>rock melon<\/li>\n  <li>salal berry<\/li>\n  <li>satsuma<\/li>\n  <li>star fruit<\/li>\n  <li>strawberry<\/li>\n  <li>tamarillo<\/li>\n  <li>tangerine<\/li>\n  <li>ugli fruit<\/li>\n  <li>watermelon<\/li>\n<\/ul>"},"evals":[],"jsHooks":[]}</script>
+<pre class="r"><code># str_view(fruit, &quot;(.)(.)(.).*\\3\\2\\1&quot;)</code></pre>
 <hr />
 </div>
 <div id="question-4" class="section level2">
@@ -1749,20 +1402,20 @@ For example <code>rac</code>e<code>car</code></p>
 <pre class="r"><code>test_str &lt;- c(&quot;abba&quot;, &quot;dancing&quot;, &quot;queen&quot;, &quot;waterloo&quot;, &quot;chiquitita&quot;)
 
 str_view(test_str, &quot;^(.).*\\1$&quot;)# &quot;^(.).?\1$&quot;)</code></pre>
-<div id="htmlwidget-b1b3f2b4e45c530e18e4" style="width:960px;height:100%;" class="str_view html-widget"></div>
-<script type="application/json" data-for="htmlwidget-b1b3f2b4e45c530e18e4">{"x":{"html":"<ul>\n  <li><span class='match'>abba<\/span><\/li>\n  <li>dancing<\/li>\n  <li>queen<\/li>\n  <li>waterloo<\/li>\n  <li>chiquitita<\/li>\n<\/ul>"},"evals":[],"jsHooks":[]}</script>
+<div id="htmlwidget-4ac903c2088889255c84" style="width:960px;height:100%;" class="str_view html-widget"></div>
+<script type="application/json" data-for="htmlwidget-4ac903c2088889255c84">{"x":{"html":"<ul>\n  <li><span class='match'>abba<\/span><\/li>\n  <li>dancing<\/li>\n  <li>queen<\/li>\n  <li>waterloo<\/li>\n  <li>chiquitita<\/li>\n<\/ul>"},"evals":[],"jsHooks":[]}</script>
 <p>Contain a repeated pair of letters (e.g. “church” contains “ch”
 repeated twice.)</p>
 <pre class="r"><code># The letters don&#39;t have to be the same (i.e. &#39;ch&#39;), so we can use a character range
 str_view(test_str, &quot;([a-zA-Z][a-zA-z]).*\\1&quot;)</code></pre>
-<div id="htmlwidget-53762b5330fc778b0159" style="width:960px;height:100%;" class="str_view html-widget"></div>
-<script type="application/json" data-for="htmlwidget-53762b5330fc778b0159">{"x":{"html":"<ul>\n  <li>abba<\/li>\n  <li>dancing<\/li>\n  <li>queen<\/li>\n  <li>waterloo<\/li>\n  <li>chiqu<span class='match'>itit<\/span>a<\/li>\n<\/ul>"},"evals":[],"jsHooks":[]}</script>
+<div id="htmlwidget-9ccfd8767c1b91c204f0" style="width:960px;height:100%;" class="str_view html-widget"></div>
+<script type="application/json" data-for="htmlwidget-9ccfd8767c1b91c204f0">{"x":{"html":"<ul>\n  <li>abba<\/li>\n  <li>dancing<\/li>\n  <li>queen<\/li>\n  <li>waterloo<\/li>\n  <li>chiqu<span class='match'>itit<\/span>a<\/li>\n<\/ul>"},"evals":[],"jsHooks":[]}</script>
 <p>Contain one letter repeated in at least three places (e.g. “eleven”
 contains three “e”s.)</p>
 <pre class="r"><code># Using two capture group references to catch the same character two additional times
-str_view(test_str, &quot;([a-zA-Z]{1})\\1\\1&quot;)</code></pre>
-<div id="htmlwidget-380ecdb3f93f1c99805d" style="width:960px;height:100%;" class="str_view html-widget"></div>
-<script type="application/json" data-for="htmlwidget-380ecdb3f93f1c99805d">{"x":{"html":"<ul>\n  <li>abba<\/li>\n  <li>dancing<\/li>\n  <li>queen<\/li>\n  <li>waterloo<\/li>\n  <li>chiquitita<\/li>\n<\/ul>"},"evals":[],"jsHooks":[]}</script>
+str_view(test_str, &quot;(.).*\\1.*\\1&quot;)</code></pre>
+<div id="htmlwidget-b3349c22006d97b0a332" style="width:960px;height:100%;" class="str_view html-widget"></div>
+<script type="application/json" data-for="htmlwidget-b3349c22006d97b0a332">{"x":{"html":"<ul>\n  <li>abba<\/li>\n  <li>dancing<\/li>\n  <li>queen<\/li>\n  <li>waterloo<\/li>\n  <li>ch<span class='match'>iquiti<\/span>ta<\/li>\n<\/ul>"},"evals":[],"jsHooks":[]}</script>
 </div>
 </div>
 

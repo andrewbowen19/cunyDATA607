@@ -6,18 +6,18 @@ output: html_document
 ---
 # Homework Assignment 3: DATA607
 
-```{r}
+```{r, results='hide'}
 library('dplyr')
 library('tidyverse')
 ```
 
 ## Question 1
-Using [FiveThirtyEight's College major list](https://raw.githubusercontent.com/fivethirtyeight/data/master/college-majors/majors-list.csv)
+Using [FiveThirtyEight's College major list](https://raw.githubusercontent.com/fivethirtyeight/data/master/college-majors/majors-list.csv) csv file, pulling the datainto our `majors` dataframe straight from GitHub for reproducability.
 ```{r}
 major_list_url <- "https://raw.githubusercontent.com/fivethirtyeight/data/master/college-majors/majors-list.csv"
 majors <- read.csv(major_list_url, header=TRUE, sep=",")
 
-majors
+head(majors, 10)
 ```
 Using the `filter` function that comes with the `dplyr` package
 ```{r}
@@ -45,20 +45,19 @@ Describe, in words, what these expressions will match:
 This expression will match for strings that have the same characterer repeated two times in a row (for example: l`oo`k). This comes from the double backreference `\1` refering to the capture group `(.)`
 ```{r}
 pattern <- "(.)\1\1"
-str_view(fruit, pattern, match=TRUE)
-
+# str_view(fruit, pattern, match=TRUE)
 ```
 
 `"(.)(.)\\2\\1"`
 This regex will match to any character groups that feature a 2-character group followed by it's "mirror" (e.g., `arra`y).
 ```{r}
-str_view(fruit, "(.)(.)\\2\\1")
+# str_view(fruit, "(.)(.)\\2\\1")
 ```
 
 `(..)\1`
 This regex will match to a word with a 2-character sequence that is repeated
 ```{r}
-str_view("FOFO", "(..)\1")
+# str_view("FOFO", "(..)\1")
 ```
 
 
@@ -66,16 +65,14 @@ str_view("FOFO", "(..)\1")
 This regex will match to any letter that appears 3 times (hence the 2 back-references) within a word.
 
 ```{r}
-str_view(fruit, "(.).\\1.\\1")
+# str_view(fruit, "(.).\\1.\\1")
 ```
 `"(.)(.)(.).*\\3\\2\\1"`
 This regex matches to strings that have a 3-character sequence that is "mirrored" later in the word. For example `rac`e`car`
 
 ```{r}
-str_view(fruit, "(.)(.)(.).*\\3\\2\\1")
+# str_view(fruit, "(.)(.)(.).*\\3\\2\\1")
 ```
-
-
 
 
 ---
@@ -97,7 +94,7 @@ str_view(test_str, "([a-zA-Z][a-zA-z]).*\\1")
 Contain one letter repeated in at least three places (e.g. "eleven" contains three "e"s.)
 ```{r}
 # Using two capture group references to catch the same character two additional times
-str_view(test_str, "([a-zA-Z]{1})\\1\\1")
+str_view(test_str, "(.).*\\1.*\\1")
 ```
 
 
