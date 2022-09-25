@@ -1,0 +1,116 @@
+---
+title: "Andrew Bowen DATA607 Project 1"
+author: "Andrew Bowen"
+date: "2022-09-21"
+output: html_document
+---
+# Project 1
+```{r, message=FALSE}
+library('dplyr')
+library('glue')
+library('plyr')
+library('stringr')
+```
+
+Reading in our table using `read.delim` as it is pipe-delimited. We'll skip the comment lines (i.e., "---...") and we'll also need to manipulate this dataframe so each player has one associated row with all their information.
+```{r}
+github_url <- "https://raw.githubusercontent.com/andrewbowen19/cunyDATA607/main/projects/project1/tournamentinfo.txt"
+
+df <- read.delim(github_url, sep="|", comment.char="-")
+df
+```
+
+```{r}
+dat <- transform(df, state = c(Pair[-1], NA))
+dat
+```
+Shifting our rows so we have all of a player's data on one line/row
+```{r}
+df <- df %>% 
+  mutate(state = c(Pair[-1], NA)) %>%
+  mutate(rating = c(Player.Name[-1], NA))
+head(df, 10)
+```
+
+Only want the odd rows now that they're consolidated. Should be able to drop exces rows
+```{r}
+odd_rows <- seq(nrow(df)) %% 2
+
+df <- df[odd_rows == 0,]
+head(df, 10)
+```
+Extracting the player's rating from the `rating` column.
+```{r}
+df<- df %>%
+  mutate(rating = str_extract(df$rating, "R:\\s(....)"))
+# Getting rid of 'R: ' prefix
+df <- df %>%
+  mutate(rating = gsub("R: ", "", df$rating))
+```
+```{r}
+# Dropping unnecessary 'X' column
+df <- select(df, -X, -Round)
+```
+
+
+Extracting the player opponent numbers -- need to remove the numbers are we don't necessarily care about wins, losses, etc. Also coercing the `rating` column to an Int type so we can average the opponent's ratings for each player.
+```{r}
+
+for (i in 1:6){
+  df <- df %>%
+          mutate(across(glue('Round.{i}'), str_replace,"(W|L|B|D|H|U)\\s+", '')) %>%  # Extract oppponent index
+          mutate(rating = as.integer(rating)) # Coerce ratings to int
+  
+}
+
+head(df, 10)
+```
+
+Looking up opponents' ratings for each player. Could likely vectorize this functionality to apply on a column basis.
+```{r}
+# Iterate over each player, need to grab each opponent's rankings
+for (i in 1:nrow(df)) {
+  # Need to calculate these metrics for each player
+  rating_sum <- 0
+  n_games_by_player <- 0 
+  avg_rating <- 0
+  
+  # Then need to average against # of games player (which won't be 6 for each player)
+  for (j in 1:6) {
+    if (is.na(df[i, j])) {
+      print("No game played.")
+    }
+    else {
+      print(opponent_num)
+      n_games_by_player <- n_games_by_player + 1
+      rating_sum <- rating_sum + df[opponent_num, 'rating']
+
+    }
+  }
+  # Calculating average rating of opponents based on # of games played
+  avg_rating <- rating_sum / n_games_by_player
+  print(glue("Avg rating: {avg_rating}"))
+  df$opp_rating[i] <- avg_rating
+
+}
+
+
+head(df, 10)
+```
+
+Only selecting columns we weant and renaming them.
+```{r}
+df <- df %>% 
+    select(Pair, Player.Name, state, Total, rating, opp_rating) %>%
+    plyr::rename(c("Pair"="no",
+                   "Player.Name" = "name",
+                   "Total" = "total",
+                   "rating" = "pre_rating",
+                   "opp_rating" = "avg_opp_rating"))
+
+head(df)
+```
+
+```{r}
+write.csv(df, "elo-ratings-cleaned.csv")
+```

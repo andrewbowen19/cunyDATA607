@@ -12,7 +12,7 @@ library('tidyverse')
 ```
 
 ## Question 1
-Using [FiveThirtyEight's College major list](https://raw.githubusercontent.com/fivethirtyeight/data/master/college-majors/majors-list.csv) csv file, pulling the datainto our `majors` dataframe straight from GitHub for reproducability.
+Using [FiveThirtyEight's College major list](https://raw.githubusercontent.com/fivethirtyeight/data/master/college-majors/majors-list.csv) csv file, pulling the data into our `majors` dataframe straight from GitHub for reproducibility.
 ```{r}
 major_list_url <- "https://raw.githubusercontent.com/fivethirtyeight/data/master/college-majors/majors-list.csv"
 majors <- read.csv(major_list_url, header=TRUE, sep=",")
@@ -73,7 +73,6 @@ This regex matches to strings that have a 3-character sequence that is "mirrored
 ```{r}
 # str_view(fruit, "(.)(.)(.).*\\3\\2\\1")
 ```
-
 
 ---
 ## Question 4

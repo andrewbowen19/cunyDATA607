@@ -1328,9 +1328,9 @@ pre code {
 <div id="question-1" class="section level2">
 <h2>Question 1</h2>
 <p>Using <a href="https://raw.githubusercontent.com/fivethirtyeight/data/master/college-majors/majors-list.csv">FiveThirtyEight’s
-College major list</a> csv file, pulling the datainto our
+College major list</a> csv file, pulling the data into our
 <code>majors</code> dataframe straight from GitHub for
-reproducability.</p>
+reproducibility.</p>
 <pre class="r"><code>major_list_url &lt;- &quot;https://raw.githubusercontent.com/fivethirtyeight/data/master/college-majors/majors-list.csv&quot;
 majors &lt;- read.csv(major_list_url, header=TRUE, sep=&quot;,&quot;)
 
@@ -1402,20 +1402,20 @@ For example <code>rac</code>e<code>car</code></p>
 <pre class="r"><code>test_str &lt;- c(&quot;abba&quot;, &quot;dancing&quot;, &quot;queen&quot;, &quot;waterloo&quot;, &quot;chiquitita&quot;)
 
 str_view(test_str, &quot;^(.).*\\1$&quot;)# &quot;^(.).?\1$&quot;)</code></pre>
-<div id="htmlwidget-4ac903c2088889255c84" style="width:960px;height:100%;" class="str_view html-widget"></div>
-<script type="application/json" data-for="htmlwidget-4ac903c2088889255c84">{"x":{"html":"<ul>\n  <li><span class='match'>abba<\/span><\/li>\n  <li>dancing<\/li>\n  <li>queen<\/li>\n  <li>waterloo<\/li>\n  <li>chiquitita<\/li>\n<\/ul>"},"evals":[],"jsHooks":[]}</script>
+<div id="htmlwidget-fcec5249f48c95e7fb3a" style="width:960px;height:100%;" class="str_view html-widget"></div>
+<script type="application/json" data-for="htmlwidget-fcec5249f48c95e7fb3a">{"x":{"html":"<ul>\n  <li><span class='match'>abba<\/span><\/li>\n  <li>dancing<\/li>\n  <li>queen<\/li>\n  <li>waterloo<\/li>\n  <li>chiquitita<\/li>\n<\/ul>"},"evals":[],"jsHooks":[]}</script>
 <p>Contain a repeated pair of letters (e.g. “church” contains “ch”
 repeated twice.)</p>
 <pre class="r"><code># The letters don&#39;t have to be the same (i.e. &#39;ch&#39;), so we can use a character range
 str_view(test_str, &quot;([a-zA-Z][a-zA-z]).*\\1&quot;)</code></pre>
-<div id="htmlwidget-9ccfd8767c1b91c204f0" style="width:960px;height:100%;" class="str_view html-widget"></div>
-<script type="application/json" data-for="htmlwidget-9ccfd8767c1b91c204f0">{"x":{"html":"<ul>\n  <li>abba<\/li>\n  <li>dancing<\/li>\n  <li>queen<\/li>\n  <li>waterloo<\/li>\n  <li>chiqu<span class='match'>itit<\/span>a<\/li>\n<\/ul>"},"evals":[],"jsHooks":[]}</script>
+<div id="htmlwidget-455e37213e1bc8d91d45" style="width:960px;height:100%;" class="str_view html-widget"></div>
+<script type="application/json" data-for="htmlwidget-455e37213e1bc8d91d45">{"x":{"html":"<ul>\n  <li>abba<\/li>\n  <li>dancing<\/li>\n  <li>queen<\/li>\n  <li>waterloo<\/li>\n  <li>chiqu<span class='match'>itit<\/span>a<\/li>\n<\/ul>"},"evals":[],"jsHooks":[]}</script>
 <p>Contain one letter repeated in at least three places (e.g. “eleven”
 contains three “e”s.)</p>
 <pre class="r"><code># Using two capture group references to catch the same character two additional times
 str_view(test_str, &quot;(.).*\\1.*\\1&quot;)</code></pre>
-<div id="htmlwidget-b3349c22006d97b0a332" style="width:960px;height:100%;" class="str_view html-widget"></div>
-<script type="application/json" data-for="htmlwidget-b3349c22006d97b0a332">{"x":{"html":"<ul>\n  <li>abba<\/li>\n  <li>dancing<\/li>\n  <li>queen<\/li>\n  <li>waterloo<\/li>\n  <li>ch<span class='match'>iquiti<\/span>ta<\/li>\n<\/ul>"},"evals":[],"jsHooks":[]}</script>
+<div id="htmlwidget-ab598dc9d2de55273497" style="width:960px;height:100%;" class="str_view html-widget"></div>
+<script type="application/json" data-for="htmlwidget-ab598dc9d2de55273497">{"x":{"html":"<ul>\n  <li>abba<\/li>\n  <li>dancing<\/li>\n  <li>queen<\/li>\n  <li>waterloo<\/li>\n  <li>ch<span class='match'>iquiti<\/span>ta<\/li>\n<\/ul>"},"evals":[],"jsHooks":[]}</script>
 </div>
 </div>
 
