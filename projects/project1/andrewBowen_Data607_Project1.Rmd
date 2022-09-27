@@ -46,10 +46,10 @@ df<- df %>%
 # Getting rid of 'R: ' prefix
 df <- df %>%
   mutate(rating = gsub("R: ", "", df$rating))
-```
-```{r}
+
 # Dropping unnecessary 'X' column
 df <- select(df, -X, -Round)
+head(df)
 ```
 
 
@@ -58,11 +58,12 @@ Extracting the player opponent numbers -- need to remove the numbers are we don'
 
 for (i in 1:6){
   df <- df %>%
-          mutate(across(glue('Round.{i}'), str_replace,"(W|L|B|D|H|U)\\s+", '')) %>%  # Extract oppponent index
-          mutate(rating = as.integer(rating)) # Coerce ratings to int
-  
-}
-
+            dplyr::mutate(across(glue('Round.{i}'), str_replace, "(W|L|B|D|H|U)\\s", '')) # Extract opponent index
+            #mutate(glue('Round.{i}'), gsub( "(W|L|B|D|H|U)\\s", ""))
+    }
+# Coerce ratings to int type
+df <- df %>%
+           dplyr::mutate(rating = as.integer(rating))
 head(df, 10)
 ```
 
@@ -81,13 +82,14 @@ for (i in 1:nrow(df)) {
       print("No game played.")
     }
     else {
-      print(opponent_num)
+      opponent_num <- as.integer(df[i, glue("Round.{j}")])
       n_games_by_player <- n_games_by_player + 1
-      rating_sum <- rating_sum + df[opponent_num, 'rating']
+      opp_rating <- df[opponent_num, 'rating']
+      rating_sum <- rating_sum + opp_rating
 
     }
   }
-  # Calculating average rating of opponents based on # of games played
+  # Calculating average rating of opponents based on # of games played.
   avg_rating <- rating_sum / n_games_by_player
   print(glue("Avg rating: {avg_rating}"))
   df$opp_rating[i] <- avg_rating
@@ -95,7 +97,7 @@ for (i in 1:nrow(df)) {
 }
 
 
-head(df, 10)
+df
 ```
 
 Only selecting columns we weant and renaming them.
@@ -111,6 +113,7 @@ df <- df %>%
 head(df)
 ```
 
+Write to a csv as ouput
 ```{r}
 write.csv(df, "elo-ratings-cleaned.csv")
 ```
