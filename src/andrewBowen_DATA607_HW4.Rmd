@@ -86,5 +86,12 @@ delays <- df %>% filter(status == "delayed") %>%
 
 ggplot(delays, aes(x=destination, y=total_delays)) + geom_bar(stat='identity')# + geom_text(aes())
 ```
-
+Plotting the all arrivals (delayed and on time) for all flights across each airline.
+```{r}
+delays_by_airline_status <- df %>%
+                        group_by(carrier, status) %>%
+                        summarise(total_delays = sum(arrival_delays))
+delays_by_airline_status
+ggplot(delays_by_airline_status, aes(x=interaction(carrier, status), y=total_delays, fill=factor(carrier))) + geom_bar(stat='identity')
+```
 
