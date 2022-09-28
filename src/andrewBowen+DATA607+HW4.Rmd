@@ -1,0 +1,90 @@
+---
+title: "Andrew Bowen DATA607 HW4"
+author: "Andrew Bowen"
+date: "2022-09-27"
+output: html_document
+---
+## Andrew Bowen - DATA607 HW 4
+
+
+```{r setup, message=FALSE}
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+```
+
+## Question 1
+I manually typed the dataset into a .csv file via vim which I then pushed to GitHub. I kept the formatting of the table to reflect the 'wide' structure it was presented in. Reading into our R dataframe from the remote repo.
+```{r}
+data_url <- "https://raw.githubusercontent.com/andrewbowen19/cunyDATA607/main/data/flight-arrival-delays.csv"
+df <- read.delim(data_url, header=TRUE, sep=",")
+
+df
+```
+
+
+Removing/re-formatting some of the missing values in our raw dataset.
+```{r}
+# Removing empty row with NA values
+df <- df %>%
+      drop_na(Los.Angeles, Phoenix, San.Diego, San.Fransisco, Seattle)
+      
+# Filling in missing carrier vals
+df[2, "Carrier"] <- "Alaska"
+df[4, "Carrier"] <- "AMWEST"
+df
+```
+
+## Question 2
+
+It looks like we'd be able to describe this dataset across 4 key dimensions: 
+  - Airline (ALASKA or AMWEST)
+  - Status (on time vs delayed)
+  - Destination (e.g, Los Angeles, Phoenix, etc.)
+  - Arrival Delay Count (how many flights arrived at those airports)
+  
+Using [tidyr's `gather`](https://www.statology.org/gather-function-in-r/) function which transforms our dataset into key-value pairs across multiple columns. This transforms our dataframe into a nice, clean 'long' format which we can use more easily in our analysis
+```{r}
+df <- tidyr::gather(df, "dest", "arrival_delays", 3:7)
+
+df
+```
+```{r}
+# Renaming our columns to snake_case
+df <- df %>% rename(carrier=Carrier, status=Status, destination = dest)
+```
+
+```{r}
+library(stringr)
+# Replacing city names with proper spelling
+df <- df %>%
+  mutate(across('destination', str_replace, "\\.", " "))
+
+df
+```
+
+
+
+```{r}
+# Let's see the total delays for each airline
+delays_by_airline <- df %>%
+  filter(status == "delayed") %>%
+  group_by(carrier) %>%
+  summarise(
+            total_delays=sum(arrival_delays)
+          )
+
+delays_by_airline
+```
+
+Plotting the delayed arrivals by destination
+```{r}
+delays <- df %>% filter(status == "delayed") %>%
+              group_by(destination) %>%
+              summarise(total_delays = sum(arrival_delays))
+
+
+ggplot(delays, aes(x=destination, y=total_delays)) + geom_bar(stat='identity')# + geom_text(aes())
+```
+
+
