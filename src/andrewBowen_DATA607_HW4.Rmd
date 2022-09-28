@@ -11,6 +11,7 @@ output: html_document
 library(dplyr)
 library(tidyr)
 library(ggplot2)
+library(stringr)
 ```
 
 ## Question 1
@@ -47,7 +48,7 @@ Using [tidyr's `gather`](https://www.statology.org/gather-function-in-r/) functi
 ```{r}
 df <- tidyr::gather(df, "dest", "arrival_delays", 3:7)
 
-df
+head(df)
 ```
 ```{r}
 # Renaming our columns to snake_case
@@ -55,15 +56,12 @@ df <- df %>% rename(carrier=Carrier, status=Status, destination = dest)
 ```
 
 ```{r}
-library(stringr)
 # Replacing city names with proper spelling
 df <- df %>%
   mutate(across('destination', str_replace, "\\.", " "))
 
 df
 ```
-
-
 
 ```{r}
 # Let's see the total delays for each airline
@@ -84,7 +82,7 @@ delays <- df %>% filter(status == "delayed") %>%
               summarise(total_delays = sum(arrival_delays))
 
 
-ggplot(delays, aes(x=destination, y=total_delays)) + geom_bar(stat='identity')# + geom_text(aes())
+ggplot(delays, aes(x=destination, y=total_delays, fill=factor(destination))) + geom_bar(stat='identity')
 ```
 Plotting the all arrivals (delayed and on time) for all flights across each airline.
 ```{r}
@@ -94,4 +92,12 @@ delays_by_airline_status <- df %>%
 delays_by_airline_status
 ggplot(delays_by_airline_status, aes(x=interaction(carrier, status), y=total_delays, fill=factor(carrier))) + geom_bar(stat='identity')
 ```
+Let's also look at delayed flights at each destination by airline
+```{r}
+delays2 <- df %>% 
+            filter(status=='delayed')
 
+ggplot(delays2, aes( x=destination, y=arrival_delays, fill=carrier)) + 
+    geom_bar(position="dodge", stat="identity")
+
+```
