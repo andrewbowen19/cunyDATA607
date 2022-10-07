@@ -1,0 +1,39 @@
+---
+title: "Andrew Bowen Data 607 Project 2"
+author: "Andrew Bowen"
+date: "2022-10-02"
+output: html_document
+---
+
+- Dataset 1: [Gross Domestic Product (GDP)](https://apps.bea.gov/iTable/iTable.cfm?reqid=19&step=3&isuri=1&nipa_table_list=5&categories=survey)
+- 
+
+```{r setup, message=FALSE}
+library(tidyverse)
+library(dplyr)
+```
+
+
+```{r}
+gdp_data_url <- "https://raw.githubusercontent.com/andrewbowen19/cunyDATA607/main/data/gdp-wide-data.csv"
+gdp <- read.csv(gdp_data_url, header=TRUE, skip=4)
+
+head(gdp)
+```
+Need to transpose the dataframe in order to 
+```{r}
+gdp <- gdp %>% 
+          gather(quarter, GDP, X2020:X2022.1)
+
+gdp
+```
+
+
+---
+
+## Dataset 2
+
+
+
+
+
