@@ -89,24 +89,61 @@ Going to use this year's [standings tables](https://www.pro-football-reference.c
 # library(XML)
 # library(RCurl)
 # library(htmltools)
-library(textreadr)
+library(rvest)
 ```
 
 
 ```{r}
-off_url <- "https://widgets.sports-reference.com/wg.fcgi?css=1&site=pfr&url=%2Fyears%2F2022%2F&div=div_team_stats"#"https://www.pro-football-reference.com/years/2022/#team_stats"
+off_url <- "https://www.pro-football-reference.com/years/2022/#team_stats"
 ```
 
 ```{r}
-df <- read_html(off_url)
+content <- read_html(off_url)
+
+tables <- content %>% html_table()
+tables
+```
+
+```{r}
+# Let's break these out by conference
+afc <- tables[[1]]
+nfc <- tables[[2]]
+
+# Combining and cleaning our two tables
+df <- rbind(afc, nfc) 
+
+df <- df %>%
+        dplyr::filter(Tm != "NFC East" ,
+               Tm != "AFC East" ,
+               Tm != "NFC South" ,
+               Tm != "AFC South" ,
+               Tm != "NFC North" ,
+               Tm != "AFC North" ,
+               Tm != "NFC West" ,
+               Tm != "AFC West"
+              ) %>%
+        dplyr::rename("wl_pct" = "W-L%")
+
+
 df
 ```
+First, I'd like to see a scatter plot of a team's point-differential ($`PF` - `PA`$) versus a team's win-loss percentage. Since no teams have had a bye week yet, using win-loss percentage is a better measure of a team's performance (in terms of winning football games).
+```{r}
+ggplot(df, aes(x=PD, y=wl_pct)) + geom_point()
+```
+It's still early in the season (4 games played at the time of this writing), so there aren't many possible records.
+
 
 
 ---
 
-## Dataset 3
-Using this [gun violence dataset](https://www.kaggle.com/datasets/jameslko/gun-violence-data?resource=download) from Kaggle. Since the original file is too big to store on GitHub, I took the first 10000 rows. Will need to tidy up some columns before we can aanlyze
+# Dataset 3: Gun Violence
+Using this [gun violence dataset](https://www.kaggle.com/datasets/jameslko/gun-violence-data?resource=download) from Kaggle. Since the original file is too big to [store on GitHub](https://raw.githubusercontent.com/andrewbowen19/cunyDATA607/main/data/gun-violence-sample.csv), I took the first 10000 rows. Will need to tidy up some columns before we can analyze. 
+```{r}
+library(sf)
+library(mapview)
+```
+
 
 ```{r}
 gv_url <- "https://raw.githubusercontent.com/andrewbowen19/cunyDATA607/main/data/gun-violence-sample.csv"
@@ -127,11 +164,8 @@ gv <- gv %>%
 head(gv, 10)
 ```
 
-```{r}
-head(gv$participant_age, 20)
-```
 
-Let's also break up our `participant_age` column so it's a bit cleaner
+Let's also break up our `participant_age` column so it's a bit cleaner for later analysis
 ```{r}
 gv <- gv  %>%
         mutate(perp_age = str_replace_all(str_extract(participant_age, "[0-9]::(\\d{1,2})"), "\\d::", ""))
@@ -158,9 +192,6 @@ ggplot(gv_with_age, aes(x=perp_age)) + geom_histogram(binwidth=5)
 
 I'd like to see the locations (via `latitude` and `longitude`) mapped out. Using the `mapview` 
 ```{r}
-library(sf)
-library(mapview)
-
 # Need to remove NA
 gv_with_locs <- gv %>%
                         filter(!is.na(longitude), !is.na(latitude))
