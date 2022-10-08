@@ -11,29 +11,99 @@ output: html_document
 ```{r setup, message=FALSE}
 library(tidyverse)
 library(dplyr)
+library(ggplot2)
 ```
 
 
 ```{r}
 gdp_data_url <- "https://raw.githubusercontent.com/andrewbowen19/cunyDATA607/main/data/gdp-wide-data.csv"
-gdp <- read.csv(gdp_data_url, header=TRUE, skip=4)
+gdp <- read.csv(gdp_data_url, header=TRUE, skip=5)
 
 head(gdp)
 ```
-Need to transpose the dataframe in order to 
+
+Re-naming some columns for readability
 ```{r}
-gdp <- gdp %>% 
-          gather(quarter, GDP, X2020:X2022.1)
+gdp <- gdp %>%
+          dplyr::rename("category" = "X",
+                        "2020.Q1" = "Q1",
+                        "2020.Q2" = "Q2",
+                        "2020.Q3" = "Q3",
+                        "2020.Q4" = "Q4",
+                        "2021.Q1" = "Q1.1",
+                        "2021.Q2" = "Q2.1",
+                        "2021.Q3" = "Q3.1",
+                        "2021.Q4" = "Q4.1",
+                        "2022.Q1" = "Q1.2",
+                        "2022.Q2" = "Q2.2",
+                        
+                        )
 
 gdp
+```
+
+```{r}
+gdp$category
+```
+
+Need to transpose the dataframe in order to get it into "long format"
+```{r}
+gdp <- gdp %>% 
+          gather(quarter, GDP, 3:12) 
+
+gdp$category <- trimws(gdp$category, which = c("both")) # trimming whitespace
+    
+
+gdp
+```
+
+Now let's make some plots. First let's get mean GDP by category
+```{r}
+ 
+gdp_avg <- gdp %>%
+              group_by(category) %>%
+              summarise(mean_gdp = mean(GDP))
+gdp_avg
+
+```
+Let's see GDP by category
+```{r}
+ggplot(gdp_avg, aes(x =category, y=mean_gdp)) + geom_bar(stat='identity') + theme(axis.text.x = element_text(angle = 90))
+```
+
+Let's try our hand at a "time series" and compare imorts to exports
+```{r}
+imp_exp <-gdp %>%
+            dplyr::filter( category == 'Imports' | category == 'Exports')
+
+ggplot(imp_exp, aes(x =quarter, y=GDP, fill=category)) + geom_point(aes(colour=factor(category)))
 ```
 
 
 ---
 
 ## Dataset 2
+Going to use this year's [standings tables](https://www.pro-football-reference.com/years/2022/#AFC) from pro-football-reference.com. Want to combine these into one table with all teams. I grabbed the csv files and uploaded them to GitHub, for reproducability.
+
+```{r, message=FALSE}
+# library(XML)
+# library(RCurl)
+# library(htmltools)
+library(textreadr)
+```
 
 
+```{r}
+off_url <- "https://widgets.sports-reference.com/wg.fcgi?css=1&site=pfr&url=%2Fyears%2F2022%2F&div=div_team_stats"#"https://www.pro-football-reference.com/years/2022/#team_stats"
+```
+
+```{r}
+df <- read_html(off_url)
+df
+```
 
 
+---
 
+## Dataset 3
+Using this [gun violence dataset](https://www.kaggle.com/datasets/jameslko/gun-violence-data?resource=download) from Kaggle. Will need to tidy up some columns
