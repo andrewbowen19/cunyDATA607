@@ -39,7 +39,7 @@ gdp <- gdp %>%
                         
                         )
 
-gdp
+head(gdp)
 ```
 
 ```{r}
@@ -54,7 +54,7 @@ gdp <- gdp %>%
 gdp$category <- trimws(gdp$category, which = c("both")) # trimming whitespace
     
 
-gdp
+head(gdp)
 ```
 
 Now let's make some plots. First let's get mean GDP by category
@@ -63,7 +63,7 @@ Now let's make some plots. First let's get mean GDP by category
 gdp_avg <- gdp %>%
               group_by(category) %>%
               summarise(mean_gdp = mean(GDP))
-gdp_avg
+head(gdp_avg)
 
 ```
 Let's see GDP by category
@@ -106,4 +106,57 @@ df
 ---
 
 ## Dataset 3
-Using this [gun violence dataset](https://www.kaggle.com/datasets/jameslko/gun-violence-data?resource=download) from Kaggle. Will need to tidy up some columns
+Using this [gun violence dataset](https://www.kaggle.com/datasets/jameslko/gun-violence-data?resource=download) from Kaggle. Since the original file is too big to store on GitHub, I took the first 10000 rows. Will need to tidy up some columns before we can aanlyze
+
+```{r}
+gv_url <- "https://raw.githubusercontent.com/andrewbowen19/cunyDATA607/main/data/gun-violence-sample.csv"
+
+gv <- read.csv(gv_url)
+
+head(gv, 15)
+```
+
+Let's start by cleaning up our `gun_stolen` and `gun_type` columns. We don't need the `0::` prefixes, for instance.
+
+```{r}
+gv <- gv %>%
+        mutate(gun_type = str_replace_all(gun_type, "^[^\\|]*\\|{2}", "")) %>%
+        mutate(gun_stolen = str_replace_all(gun_stolen, "^[^\\|]*\\|", ""))
+
+
+head(gv, 10)
+```
+
+```{r}
+head(gv$participant_age, 20)
+```
+
+Let's also break up our `participant_age` column so it's a bit cleaner
+```{r}
+gv <- gv  %>%
+        mutate(perp_age = str_replace_all(str_extract(participant_age, "[0-9]::(\\d{1,2})"), "\\d::", ""))
+
+head(gv)
+```
+
+
+Now let's make some plots to make sense of our dataset
+```{r}
+ggplot(gv, aes(x=n_killed)) + geom_histogram(binwidth=1)
+```
+
+I'd like to see the locations (via `latitude` and `longitude`) mapped out. Using the `mapview` 
+```{r}
+library(sf)
+library(mapview)
+
+# Need to remove NA
+gv_with_locs <- gv %>%
+                        filter(!is.na(longitude), !is.na(latitude))
+
+mapview(gv_with_locs, xcol="longitude", ycol="latitude", crs = 4326)
+
+
+```
+
+
