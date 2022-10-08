@@ -145,6 +145,17 @@ Now let's make some plots to make sense of our dataset
 ggplot(gv, aes(x=n_killed)) + geom_histogram(binwidth=1)
 ```
 
+Also would like to see a histogram of ages involved in gun violence incidents.
+```{r}
+# Need to remove NA values for a cleaner graph
+gv_with_age <- gv %>%
+                filter(!is.na(perp_age)) %>%
+                mutate(perp_age = as.integer(perp_age))
+
+ggplot(gv_with_age, aes(x=perp_age)) + geom_histogram(binwidth=5)
+```
+
+
 I'd like to see the locations (via `latitude` and `longitude`) mapped out. Using the `mapview` 
 ```{r}
 library(sf)
