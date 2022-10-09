@@ -5,9 +5,14 @@ date: "2022-10-02"
 output: html_document
 ---
 
-- Dataset 1: [Gross Domestic Product (GDP)](https://apps.bea.gov/iTable/iTable.cfm?reqid=19&step=3&isuri=1&nipa_table_list=5&categories=survey)
-- 
+- *Dataset 1*: [Gross Domestic Product (GDP)](https://apps.bea.gov/iTable/iTable.cfm?reqid=19&step=3&isuri=1&nipa_table_list=5&categories=survey)
+- *Dataset 2:* [NFL Standings](https://www.pro-football-reference.com/years/2022/#team_stats)
+- *Dataset 3:* [Gun Violence Incidents](https://www.kaggle.com/datasets/jameslko/gun-violence-data?resource=download)
 
+---
+# Dataset 1: GDP Table
+
+Interested to see the breakdown of GDP and its different characteristics in each category. I'd like to clean this table so each observation (year & quarter) form an observation (row) within our dataset.
 ```{r setup, message=FALSE}
 library(tidyverse)
 library(dplyr)
@@ -82,13 +87,9 @@ ggplot(imp_exp, aes(x =quarter, y=GDP, fill=category)) + geom_point(aes(colour=f
 
 ---
 
-## Dataset 2
-Going to use this year's [standings tables](https://www.pro-football-reference.com/years/2022/#AFC) from pro-football-reference.com. Want to combine these into one table with all teams. I grabbed the csv files and uploaded them to GitHub, for reproducability.
-
+# Dataset 2: NFL Standings
+Going to use this year's [standings tables](https://www.pro-football-reference.com/years/2022/#AFC) from pro-football-reference.com. Want to combine these into one table with all teams. We'll scrape the data directly from the page itself using the `rvest` library. These data sets also live in csv format on GitHub ([AFC](https://raw.githubusercontent.com/andrewbowen19/cunyDATA607/main/data/afc-standings.csv), [NFC](https://raw.githubusercontent.com/andrewbowen19/cunyDATA607/main/data/nfc-standings.csv)).
 ```{r, message=FALSE}
-# library(XML)
-# library(RCurl)
-# library(htmltools)
 library(rvest)
 ```
 
@@ -98,14 +99,16 @@ off_url <- "https://www.pro-football-reference.com/years/2022/#team_stats"
 ```
 
 ```{r}
+# The data is read into a list of dataframes, which we'll have to unpack by conference
 content <- read_html(off_url)
 
 tables <- content %>% html_table()
 tables
 ```
 
+Let's combine these conference-specific dataframes into a single dataframe. While we're at it, let's filter our the sub-header rows.
 ```{r}
-# Let's break these out by conference
+# Let's unpack the dataframes by conference
 afc <- tables[[1]]
 nfc <- tables[[2]]
 
@@ -122,17 +125,32 @@ df <- df %>%
                Tm != "NFC West" ,
                Tm != "AFC West"
               ) %>%
-        dplyr::rename("wl_pct" = "W-L%")
+        dplyr::rename("wl_pct" = "W-L%")  # Makes it easier to access this column when renamed
 
 
-df
+df #head(df)
 ```
+Lastly, we're not dealing with multiple `NA` values in our dataframe, so let's coerce relevant columns to numeric types for calculation later.
+```{r}
+df[, 2:13] <- sapply(df[, 2:13], as.factor)
+```
+
+
 First, I'd like to see a scatter plot of a team's point-differential ($`PF` - `PA`$) versus a team's win-loss percentage. Since no teams have had a bye week yet, using win-loss percentage is a better measure of a team's performance (in terms of winning football games).
 ```{r}
 ggplot(df, aes(x=PD, y=wl_pct)) + geom_point()
 ```
-It's still early in the season (4 games played at the time of this writing), so there aren't many possible records.
+It's still early in the season (4 games played at the time of this writing), so there aren't many possible records, leading to a "stepwise" pattern in the above plot.
 
+
+I'd also like to see a plot of offensive and defensive SRS, which measures a team relative to average
+```{r}
+ggplot(df, aes(x=DSRS, y=OSRS)) + geom_point()
+```
+Let's see if there's any correlation between a team's defensive rating versus offensive.
+```{r}
+cor(as.numeric(df$OSRS), as.numeric(df$DSRS))
+```
 
 
 ---
