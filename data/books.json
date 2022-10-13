@@ -1,0 +1,24 @@
+{
+    "book1": {
+        "title": "Funny Weather: Art in an Emergency",
+        "author": "Olivia Laing",
+        "ISBN": "132400570X",
+        "rating": 5,
+        "genre": "non-fiction"
+    },
+    "book3": {
+        "title": "Weapons of Math Destruction",
+        "author": "Cathy O'Neil",
+        "ISBN": "0553418815",
+        "rating": 4,
+        "genre": "Mathematics"
+    },
+    "book3": {
+        "title": "Capitalism Without Capital",
+        "author": "Jonathan Haskell",
+        "ISBN": "0691175039",
+        "rating": 5,
+        "genre": "Social Science"
+    }
+
+}
