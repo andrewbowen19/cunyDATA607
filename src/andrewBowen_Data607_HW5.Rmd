@@ -29,7 +29,7 @@ xml_url <- "https://raw.githubusercontent.com/andrewbowen19/cunyDATA607/main/dat
 
 ## JSON read-in
 ```{r json-read-in}
-json_data <- fromJSON(file=json_url)  # Replace this with github url
+json_data <- fromJSON(file=json_url, simplify=TRUE)
 
 json_df <- as.data.frame(json_data)
 
@@ -83,4 +83,3 @@ html_df$rating <- as.double(html_df$rating)
 html_df
 ```
 This looks consistent with our above XML and JSON dataframes!
-* * *

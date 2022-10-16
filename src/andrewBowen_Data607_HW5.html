@@ -370,22 +370,22 @@ pre code {
 </div>
 
 
-<p><em>TODO:</em> - Ensure file paths are github urls - HTML and XML
-read-in - Publish to Rpubs</p>
+<p><em>TODO:</em> - [x] Ensure file paths are github urls - [x] HTML and
+XML read-in - Publish to Rpubs</p>
 <p>Using a few libraries to parse the various data formats</p>
-<pre class="r"><code>library(XML)
+<pre class="r"><code>library(rvest)
+library(XML)
 library(xml2)
 library(rjson)
 library(dplyr)
 library(tidyr)</code></pre>
 <p>First, let’s lay out where we’re</p>
-<pre class="r"><code># TODD: replace local paths with GitHub URL on better network conn
-json_url &lt;- &quot;~/CUNY/cunyDATA607/data/books.json&quot;
-html_url &lt;- &quot;~/CUNY/cunyDATA607/data/books.html&quot;
-xml_url &lt;- &quot;~/CUNY/cunyDATA607/data/books.xml&quot;</code></pre>
+<pre class="r"><code>json_url &lt;- &quot;https://raw.githubusercontent.com/andrewbowen19/cunyDATA607/main/data/books.json&quot;
+html_url &lt;- &quot;https://raw.githubusercontent.com/andrewbowen19/cunyDATA607/main/data/books.html&quot;
+xml_url &lt;- &quot;https://raw.githubusercontent.com/andrewbowen19/cunyDATA607/main/data/books.xml&quot;</code></pre>
 <div id="json-read-in" class="section level2">
 <h2>JSON read-in</h2>
-<pre class="r"><code>json_data &lt;- fromJSON(file=json_url)  # Replace this with github url
+<pre class="r"><code>json_data &lt;- fromJSON(file=json_url, simplify=TRUE)
 
 json_df &lt;- as.data.frame(json_data)
 
@@ -406,7 +406,7 @@ sense that</p>
 <h2>XML Read-in</h2>
 <p>We put the same data into our XML file, but in a different format. We
 still want each book to constitute a row in our dataframe</p>
-<pre class="r"><code>xml_data &lt;- xml2::read_xml(xml_url)
+<pre class="r"><code>xml_data &lt;- xml2::read_xml(xml_url, as_html=FALSE)
 
 # Parse XML and convert into R dataframe
 book_xml &lt;- XML::xmlParse(xml_data)
@@ -427,44 +427,38 @@ our <code>json_df</code></p>
 </div>
 <div id="html-read-in" class="section level2">
 <h2>HTML read-in</h2>
-<p>Going to use the <code>XML</code> library from aboce and its
+<p>Going to use the <code>XML</code> library from above and its
 <code>readHTMLTable</code> method in order to grab data from out html
 table.</p>
-<pre class="r"><code># Read in using XML::readHTMLTable method
-html &lt;- readHTMLTable(html_url, as.data.frame=TRUE)
-html_df &lt;- as.data.frame(html)
+<pre class="r"><code>html_df &lt;- (rvest::read_html(html_url) %&gt;% html_table)[[1]]
+
+# Read in using XML::readHTMLTable method
+# html &lt;- readHTMLTable(html_url), as.data.frame=TRUE) # &quot;../data/books.html
+# html_df &lt;- as.data.frame(html)
 
 html_df</code></pre>
-<pre><code>##                           NULL.title      NULL.author  NULL.ISBN NULL.rating
-## 1 Funny Weather: Art in an Emergency     Olivia Laing 132400570X           5
-## 2        Weapons of Math Destruction     Cathy O&#39;Neil 0553418815           4
-## 3         Capitalism without Capital Jonathan Haskell 0691175039           5
-##       NULL.genre
-## 1    Non-fiction
-## 2    Mathematics
-## 3 Social Science</code></pre>
+<pre><code>## # A tibble: 3 × 5
+##   title                              author           ISBN       rating genre   
+##   &lt;chr&gt;                              &lt;chr&gt;            &lt;chr&gt;       &lt;int&gt; &lt;chr&gt;   
+## 1 Funny Weather: Art in an Emergency Olivia Laing     132400570X      5 Non-fic…
+## 2 Weapons of Math Destruction        Cathy O&#39;Neil     0553418815      4 Mathema…
+## 3 Capitalism without Capital         Jonathan Haskell 0691175039      5 Social …</code></pre>
 <p>This dataframe is close to the ones we generated vai XML and JSON,
 with the <code>rating</code> type as a <code>character</code> rather
 than an <code>double</code>, and the column names prefixed by
 <em>NULL.</em>. Let’s</p>
-<pre class="r"><code>html_df &lt;- html_df %&gt;% 
-                  rename(&quot;title&quot; = &quot;NULL.title&quot;,
-                         &quot;author&quot; = &quot;NULL.author&quot;,
-                         &quot;ISBN&quot; = &quot;NULL.ISBN&quot;,
-                         &quot;rating&quot; = &quot;NULL.rating&quot;,
-                         &quot;genre&quot; = &quot;NULL.genre&quot;)
+<pre class="r"><code>html_df &lt;- (rvest::read_html(html_url) %&gt;% html_table)[[1]]
+
 html_df$rating &lt;- as.double(html_df$rating)
 
 html_df</code></pre>
-<pre><code>##                                title           author       ISBN rating
-## 1 Funny Weather: Art in an Emergency     Olivia Laing 132400570X      5
-## 2        Weapons of Math Destruction     Cathy O&#39;Neil 0553418815      4
-## 3         Capitalism without Capital Jonathan Haskell 0691175039      5
-##            genre
-## 1    Non-fiction
-## 2    Mathematics
-## 3 Social Science</code></pre>
-<hr />
+<pre><code>## # A tibble: 3 × 5
+##   title                              author           ISBN       rating genre   
+##   &lt;chr&gt;                              &lt;chr&gt;            &lt;chr&gt;       &lt;dbl&gt; &lt;chr&gt;   
+## 1 Funny Weather: Art in an Emergency Olivia Laing     132400570X      5 Non-fic…
+## 2 Weapons of Math Destruction        Cathy O&#39;Neil     0553418815      4 Mathema…
+## 3 Capitalism without Capital         Jonathan Haskell 0691175039      5 Social …</code></pre>
+<p>This looks consistent with our above XML and JSON dataframes!</p>
 </div>
 
 
