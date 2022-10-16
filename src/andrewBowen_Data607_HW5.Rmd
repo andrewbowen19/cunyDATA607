@@ -6,12 +6,13 @@ output: html_document
 ---
 
 *TODO:*
-- Ensure file paths are github urls
-- HTML and XML read-in
+- [x] Ensure file paths are github urls
+- [x] HTML and XML read-in
 - Publish to Rpubs
   
 Using a few libraries to parse the various data formats
 ```{r message=FALSE}
+library(rvest)
 library(XML)
 library(xml2)
 library(rjson)
@@ -21,10 +22,9 @@ library(tidyr)
 
 First, let's lay out where we're
 ```{r url-def}
-# TODD: replace local paths with GitHub URL on better network conn
-json_url <- "~/CUNY/cunyDATA607/data/books.json"
-html_url <- "~/CUNY/cunyDATA607/data/books.html"
-xml_url <- "~/CUNY/cunyDATA607/data/books.xml"
+json_url <- "https://raw.githubusercontent.com/andrewbowen19/cunyDATA607/main/data/books.json"
+html_url <- "https://raw.githubusercontent.com/andrewbowen19/cunyDATA607/main/data/books.html"
+xml_url <- "https://raw.githubusercontent.com/andrewbowen19/cunyDATA607/main/data/books.xml"
 ```
 
 ## JSON read-in
@@ -42,7 +42,7 @@ This table looks pretty neatly formatted. Since we want one "item"/"observation"
 
 We put the same data into our XML file, but in a different format. We still want each book to constitute a row in our dataframe
 ```{r xml-read-in}
-xml_data <- xml2::read_xml(xml_url)
+xml_data <- xml2::read_xml(xml_url, as_html=FALSE)
 
 # Parse XML and convert into R dataframe
 book_xml <- XML::xmlParse(xml_data)
@@ -59,11 +59,15 @@ xml_df$rating <- as.double(xml_df$rating)
 
 ## HTML read-in
 
-Going to use the `XML` library from aboce and its `readHTMLTable` method in order to grab data from out html table.
+Going to use the `XML` library from above and its `readHTMLTable` method in order to grab data from out html table.
 ```{r html-read-in}
+
+
+html_df <- (rvest::read_html(html_url) %>% html_table)[[1]]
+
 # Read in using XML::readHTMLTable method
-html <- readHTMLTable(html_url, as.data.frame=TRUE)
-html_df <- as.data.frame(html)
+# html <- readHTMLTable(html_url), as.data.frame=TRUE) # "../data/books.html
+# html_df <- as.data.frame(html)
 
 html_df
 ```
@@ -71,16 +75,12 @@ html_df
 This dataframe is close to the ones we generated vai XML and JSON, with the `rating` type as a `character` rather than an `double`, and the column names prefixed by *NULL.*. Let's 
 
 ```{r html-standrdize}
-html_df <- html_df %>% 
-                  rename("title" = "NULL.title",
-                         "author" = "NULL.author",
-                         "ISBN" = "NULL.ISBN",
-                         "rating" = "NULL.rating",
-                         "genre" = "NULL.genre")
+
+html_df <- (rvest::read_html(html_url) %>% html_table)[[1]]
+
 html_df$rating <- as.double(html_df$rating)
 
 html_df
 ```
-
-
+This looks consistent with our above XML and JSON dataframes!
 * * *
