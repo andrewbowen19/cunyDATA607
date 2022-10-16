@@ -1,23 +1,25 @@
-<book1>
-    <title>Funny Weather: Art in an Emergency</title>
-    <author>Olivia Laing</author>
-    <ISBN>132400570X</ISBN>
-    <rating>5</rating>
-    <genre>Non-fiction</genre>
-</book1>
+<Books>
+    <book1>
+        <title>Funny Weather: Art in an Emergency</title>
+        <author>Olivia Laing</author>
+        <ISBN>132400570X</ISBN>
+        <rating>5</rating>
+        <genre>Non-fiction</genre>
+    </book1>
 
-<book2>
-    <title>Weapons of Math Destruction</title>
-    <author>Cathy O'Neil</author>
-    <ISBN>0553418815</ISBN>
-    <rating>4</rating>
-    <genre>Mathematics</genre>
-</book2>
+    <book2>
+        <title>Weapons of Math Destruction</title>
+        <author>Cathy O'Neil</author>
+        <ISBN>0553418815</ISBN>
+        <rating>4</rating>
+        <genre>Mathematics</genre>
+    </book2>
 
-<book3>
-    <title>Capitalism Without Capital</title>
-    <author>Jonathan Haskell</author>
-    <ISBN>0691175039</ISBN>
-    <rating>5</rating>
-    <genre>Social Science</genre>
-</book3>
+    <book3>
+        <title>Capitalism Without Capital</title>
+        <author>Jonathan Haskell</author>
+        <ISBN>0691175039</ISBN>
+        <rating>5</rating>
+        <genre>Social Science</genre>
+    </book3>
+</Books>
