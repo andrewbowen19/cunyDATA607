@@ -1,0 +1,49 @@
+---
+title: "Andrew Bowen Data 607 HW 6"
+author: "Andrew Bowen"
+date: "2022-10-24"
+output: html_document
+---
+
+# Andrew Bowen Data 607 HW 6
+
+Using data from the [NY Times public api](https://developer.nytimes.com/apis) to read JSON data into an R dataframe.
+
+```{r setup, message=FALSE}
+library(httr)
+library(dplyr)
+library(glue)
+library(jsonlite)
+library(ggplot2)
+library(rjson)
+```
+
+First we'll need to defin our API endpoint (URL). I chose the [NT Times Books API](https://developer.nytimes.com/docs/books-product/1/overview), which provides data on NY Times bestseller lists. I am setting my API key value in the environment variable `NY_TIMES_API_KEY`. Please check my blackboard submission for my key value, or feel free to use your own key as it's a public-facing API. 
+```{r}
+
+api_key = Sys.getenv("NY_TIMES_API_KEY")
+url <- glue('https://api.nytimes.com/svc/books/v3/lists/current/hardcover-fiction.json?api-key={api_key}')
+
+# Call the API and get an HTTP response
+response <- GET(url, format="json")
+
+response
+```
+
+Now we need to extract the content from that API response. We can use the`content` attribute from the `httr::response` object. We can then use the `jsonlite::fromJSON` method to parse the response into a dataframe.
+```{r}
+# Getting content of HTTP response
+details <- content(response, as="text")
+
+df <- jsonlite::fromJSON(details)
+
+# extracting our books dataframe from the results field
+df <- df$results$books
+
+head(df)
+```
+
+Let's do some quick visualization of our dataset
+```{r}
+ggplot(df, aes(x = weeks_on_list)) + geom_histogram()
+```
