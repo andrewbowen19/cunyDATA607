@@ -15,7 +15,7 @@ library(dplyr)
 library(glue)
 library(jsonlite)
 library(ggplot2)
-library(rjson)
+library(tidyr)
 ```
 
 First we'll need to defin our API endpoint (URL). I chose the [NT Times Books API](https://developer.nytimes.com/docs/books-product/1/overview), which provides data on NY Times bestseller lists. I am setting my API key value in the environment variable `NY_TIMES_API_KEY`. Please check my blackboard submission for my key value, or feel free to use your own key as it's a public-facing API. 
@@ -47,3 +47,6 @@ Let's do some quick visualization of our dataset
 ```{r}
 ggplot(df, aes(x = weeks_on_list)) + geom_histogram()
 ```
+
+
+

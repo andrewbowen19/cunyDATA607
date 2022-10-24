@@ -379,7 +379,7 @@ library(dplyr)
 library(glue)
 library(jsonlite)
 library(ggplot2)
-library(rjson)</code></pre>
+library(tidyr)</code></pre>
 <p>First we’ll need to defin our API endpoint (URL). I chose the <a href="https://developer.nytimes.com/docs/books-product/1/overview">NT
 Times Books API</a>, which provides data on NY Times bestseller lists. I
 am setting my API key value in the environment variable
@@ -394,7 +394,7 @@ response &lt;- GET(url, format=&quot;json&quot;)
 
 response</code></pre>
 <pre><code>## Response [https://api.nytimes.com/svc/books/v3/lists/current/hardcover-fiction.json?api-key=wzAGVekxF6AAfVaT0QPgT4x5GvkBH5qe]
-##   Date: 2022-10-24 17:59
+##   Date: 2022-10-24 18:03
 ##   Status: 200
 ##   Content-Type: application/json; charset=UTF-8
 ##   Size: 34.6 kB</code></pre>
