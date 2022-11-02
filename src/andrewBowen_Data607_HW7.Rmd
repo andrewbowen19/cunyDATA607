@@ -1,0 +1,229 @@
+---
+title: "Andrew Bowen DATA 607 HW 7"
+author: "Andrew Bowen"
+date: "2022-11-01"
+output: html_document
+bibliography: references.bib
+---
+
+Using the sample code from [Chapter 2 of Text Mining with R](https://www.tidytextmining.com/sentiment.html)
+```{r setup, message=FALSE}
+library(tidytext)
+library(tidyr)
+library(janeaustenr)
+library(dplyr)
+library(stringr)
+library(ggplot2)
+library(wordcloud)
+library(reshape2)
+```
+
+```{r}
+get_sentiments("afinn")
+get_sentiments("bing")
+get_sentiments("nrc")
+```
+
+
+```{r, message=FALSE}
+tidy_books <- austen_books() %>%
+  group_by(book) %>%
+  mutate(
+    linenumber = row_number(),
+    chapter = cumsum(str_detect(text, 
+                                regex("^chapter [\\divxlc]", 
+                                      ignore_case = TRUE)))) %>%
+  ungroup() %>%
+  unnest_tokens(word, text)
+
+```
+
+```{r}
+nrc_joy <- get_sentiments("nrc") %>% 
+  filter(sentiment == "joy")
+
+tidy_books %>%
+  filter(book == "Emma") %>%
+  inner_join(nrc_joy) %>%
+  count(word, sort = TRUE)
+```
+
+```{r}
+jane_austen_sentiment <- tidy_books %>%
+  inner_join(get_sentiments("bing")) %>%
+  count(book, index = linenumber %/% 80, sentiment) %>%
+  pivot_wider(names_from = sentiment, values_from = n, values_fill = 0) %>% 
+  mutate(sentiment = positive - negative)
+
+# Plotting the sentiment scores
+ggplot(jane_austen_sentiment, aes(index, sentiment, fill = book)) +
+  geom_col(show.legend = FALSE) +
+  facet_wrap(~book, ncol = 2, scales = "free_x")
+```
+Comparing NRC lexibon to others
+```{r}
+get_sentiments("nrc") %>% 
+  filter(sentiment %in% c("positive", "negative")) %>% 
+  count(sentiment)
+
+get_sentiments("bing") %>% 
+  count(sentiment)
+
+bing_word_counts <- tidy_books %>%
+  inner_join(get_sentiments("bing")) %>%
+  count(word, sentiment, sort = TRUE) %>%
+  ungroup()
+
+bing_word_counts %>%
+  group_by(sentiment) %>%
+  slice_max(n, n = 10) %>% 
+  ungroup() %>%
+  mutate(word = reorder(word, n)) %>%
+  ggplot(aes(n, word, fill = sentiment)) +
+  geom_col(show.legend = FALSE) +
+  facet_wrap(~sentiment, scales = "free_y") +
+  labs(x = "Contribution to sentiment",
+       y = NULL)
+```
+
+
+```{r}
+custom_stop_words <- bind_rows(tibble(word = c("miss"),  
+                                      lexicon = c("custom")), 
+                               stop_words)
+```
+
+Generating word clouds
+```{r}
+tidy_books %>%
+  anti_join(stop_words) %>%
+  count(word) %>%
+  with(wordcloud(word, n, max.words = 100))
+
+tidy_books %>%
+  inner_join(get_sentiments("bing")) %>%
+  count(word, sentiment, sort = TRUE) %>%
+  acast(word ~ sentiment, value.var = "n", fill = 0) %>%
+  comparison.cloud(colors = c("gray20", "gray80"),
+                   max.words = 100)
+```
+Now we'll look at a sentence level rather than a word level
+```{r}
+p_and_p_sentences <- tibble(text = prideprejudice) %>% 
+  unnest_tokens(sentence, text, token = "sentences")
+
+# can also split tokens via regex
+austen_chapters <- austen_books() %>%
+  group_by(book) %>%
+  unnest_tokens(chapter, text, token = "regex", 
+                pattern = "Chapter|CHAPTER [\\dIVXLC]") %>%
+  ungroup()
+
+austen_chapters %>% 
+  group_by(book) %>% 
+  summarise(chapters = n())
+```
+
+```{r}
+bingnegative <- get_sentiments("bing") %>% 
+  filter(sentiment == "negative")
+
+wordcounts <- tidy_books %>%
+  group_by(book, chapter) %>%
+  summarize(words = n())
+
+tidy_books %>%
+  semi_join(bingnegative) %>%
+  group_by(book, chapter) %>%
+  summarize(negativewords = n()) %>%
+  left_join(wordcounts, by = c("book", "chapter")) %>%
+  mutate(ratio = negativewords/words) %>%
+  filter(chapter != 0) %>%
+  slice_max(ratio, n = 1) %>% 
+  ungroup()
+
+```
+
+---
+## Part 1
+Using a different corpus and sentiment lexicon, as well as corpus. For my corpus/dataset, I chose the [Harry Potter novels](https://uc-r.github.io/sentiment_analysis), included in the `harrypotter` library. I'll also be using the [Jockers lexicon](https://rdrr.io/cran/lexicon/man/hash_sentiment_jockers_rinker.html) included in the `lexicon` package, which includes polarity scores as lookup values for 11,710 words.
+
+```{r}
+library(harrypotter)
+library(sentimentr)
+library(lexicon)
+```
+
+Getting Jockers lexicon into a dataframe and renaming columns for readability
+```{r}
+j_lexicon <- as.data.frame(lexicon::hash_sentiment_jockers)
+j_lexicon <- j_lexicon %>%
+          rename("word" = "x", "score" = "y")
+```
+
+We'll be using the text of *Harry Potter and the Chamber of Secrets* in our example. We pulled the corpus from [this .rda file](https://github.com/bradleyboehmke/harrypotter/blob/master/data/chamber_of_secrets.rda) included in the `harrypotter` package. Each element in our `chamber_of_secrets` character vector is a chapter of the book. We'll use `unnest_tokens` to break out each word into it's own row of a dataframe.
+```{r}
+text_cs <- tibble(chapter = seq_along(chamber_of_secrets),
+                  text = chamber_of_secrets) %>%
+                  unnest_tokens(word, text)
+```
+
+Doing an inner join to get our lexicon scores matched up with the words in the text
+```{r}
+cs_scores <- text_cs %>%
+  inner_join(j_lexicon) %>%
+  count(word, score,  sort = TRUE) %>%
+  ungroup()
+```
+
+Plotting our results as done above in the Jane Austen example code - these sentiment scores per word are a bit busy. 
+```{r}
+cs_scores %>% 
+      mutate(index = row_number()) %>%
+      ggplot( aes(index, score)) +
+        geom_col(show.legend = FALSE) 
+```
+
+Let's re-build a lexicon with [all 7 Harry Potter Books](https://github.com/bradleyboehmke/harrypotter/tree/master/data)
+```{r}
+text_ps <- tibble(chapter = seq_along(philosophers_stone),
+                  text = philosophers_stone) %>%
+                  unnest_tokens(word, text) %>%
+                  mutate(book = "Philosopher's Stone")
+
+text_pa <- tibble(chapter = seq_along(prisoner_of_azkaban),
+                  text = prisoner_of_azkaban) %>%
+                  unnest_tokens(word, text) %>%
+                  mutate(book = "Prisoner of Azkaban")
+
+text_gf <- tibble(chapter = seq_along(goblet_of_fire),
+                  text = goblet_of_fire) %>%
+                  unnest_tokens(word, text) %>%
+                  mutate(book = "Goblet of Fire")
+
+text_op <- tibble(chapter = seq_along(order_of_the_phoenix),
+                  text = order_of_the_phoenix) %>%
+                  unnest_tokens(word, text) %>%
+                  mutate(book = "Order of the Phoenix")
+
+text_hb <- tibble(chapter = seq_along(half_blood_prince),
+                  text = half_blood_prince) %>%
+                  unnest_tokens(word, text) %>%
+                  mutate(book = "Half-Blood Prince")
+
+
+text_dh <- tibble(chapter = seq_along(deathly_hallows),
+                  text = deathly_hallows) %>%
+                  unnest_tokens(word, text) %>%
+                  mutate(book = "Deathly Hallows")
+```
+
+
+```{r}
+df <- rbind(text_ps, text_cs, text_pa)
+```
+
+
+---
+## Bibliography
+[@textMiningWithR]
