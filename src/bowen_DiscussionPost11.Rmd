@@ -1,0 +1,38 @@
+---
+title: "Andrew Bowen Data 607 Discussion Post 11"
+author: "Andrew Bowen"
+date: "2022-11-02"
+output: html_document
+---
+
+I (admittedly) watch too much content on YoutTube. I was interested in how the YouTube recommendation algorithm keeps producing new videos that could pique my interest. 
+
+# Scenario Design
+Answering the 3 Scenario Design questions that provide a framework on building UX.
+
+## 1 Who are your target users?
+These are generally YouTube users who are familiar with the site and have certain interests. 
+
+## 2 What are their key goals?
+YouTube users generally navigate to the site wanting to watch 1 or 2 videos in mind. They often go "down the rabbit hole" when recommended videos that appear in the sidebar are of interest to them. These generally have some overlap in subject with the video currently playing. For instance, a user watching a video on basketball may see recommended videos on other basketball topics, possibly a football video, but likely will not see a video on Italian cinema. These users may want to watch only one video originally, 
+
+## 3 How can you help them accomplish their goals?
+
+
+By having a recommendation model that can recommend desirable and relevant videos consistently, YouTube can connect audiences to the information and creators they are interested in. YouTube can also implement this on a user's homepage, and give them quick access to their most relevant videos.
+
+---
+# Reverse Engineering YouTube's Recommendation System
+Looking at the public-facing [YouTube blog](https://blog.youtube/inside-youtube/on-youtubes-recommendation-system/), there are millions of inputs going into the YouTube recommendation system. Some of the primary features of their model are listed below:
+
+- Clicks: if a user clicks into a video, it's likely they are interested in it
+- Watchtime: if a user watched the majority/all of a video, they likely enjoy that content
+- Survey Responses: users will respond to surveys with their interests. ([self-reporting](https://www.google.com/url?sa=t&rct=j&q=&esrc=s&source=web&cd=&cad=rja&uact=8&ved=2ahUKEwjx-4740JD7AhWZjokEHR2YAvQQFnoECCEQAw&url=https%3A%2F%2Fthedecisionlab.com%2Fbiases%2Fresponse-bias&usg=AOvVaw2SimUrCefw7zL1Ah9n8vTq) and response bias may play to an advantage here)
+- Likes, Shares, Dislikes: interactions with videos via these mechanisms also reveal user preferences
+
+There are likely other inputs into YouTube's model related to a given user and their preferences. For example, [this study](https://kclpure.kcl.ac.uk/portal/files/78051692/Follow_the_Algorithm_AIROLDI_Publishedonline13May2016_GREEN_AAM_CC_BY_NC_ND_.pdf) attempted to reverse engineer the associations between musical content on Youtube.
+
+---
+
+# Recommendations fror Improvement
+One of the primary issues facing YouTube and other tech platforms is the spread of [misinformation](https://static1.squarespace.com/static/5b6df958f8370af3217d4178/t/62a38fc022745a7274601da0/1654886337000/NYU+CBHR+YouTube_Final_June10.pdf). Specifying weights and thinking about how those inputs are weighted can be critical in keeping YouTube's recommendation system from promoting videos spreading false information. In addition, better moderation policies that remove or flag videos containing misinformation could help mitigate this problem. 
