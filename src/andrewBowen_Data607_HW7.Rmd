@@ -162,10 +162,22 @@ j_lexicon <- j_lexicon %>%
 ```
 
 We'll be using the text of *Harry Potter and the Chamber of Secrets* in our example. We pulled the corpus from [this .rda file](https://github.com/bradleyboehmke/harrypotter/blob/master/data/chamber_of_secrets.rda) included in the `harrypotter` package. Each element in our `chamber_of_secrets` character vector is a chapter of the book. We'll use `unnest_tokens` to break out each word into it's own row of a dataframe.
+
+```{r}
+philosophers_stone <- load(file="../data/philosophers_stone.rda")
+chamber_of_secrets <- load(file="../data/chamber_of_secrets.rda")
+prisoner_of_azkaban <- load(file="../data/prisoner_of_azkaban.rda")
+goblet_of_fire <- load(file="../data/goblet_of_fire.rda")
+order_of_the_phoenix <- load(file="../data/order_of_the_phoenix.rda")
+half_blood_prince <- load(file="../data/half_blood_prince.rda")
+deathly_hallows <- load(file="../data/deathly_hallows.rda")
+```
+
 ```{r}
 text_cs <- tibble(chapter = seq_along(chamber_of_secrets),
                   text = chamber_of_secrets) %>%
-                  unnest_tokens(word, text)
+                  unnest_tokens(word, text) %>%
+                  mutate(book = "Chamber of Secrets")
 ```
 
 Doing an inner join to get our lexicon scores matched up with the words in the text
@@ -220,9 +232,20 @@ text_dh <- tibble(chapter = seq_along(deathly_hallows),
 
 
 ```{r}
-df <- rbind(text_ps, text_cs, text_pa)
+df <- rbind(text_ps, text_cs, text_pa, text_gf, text_op, text_hb, text_dh)
 ```
 
+
+```{r}
+df_sentiment <- df %>%
+  left_join(j_lexicon) %>%
+  count(book, index = c(1:nrow(df)), score)
+
+# Plotting the sentiment scores
+ggplot(df_sentiment, aes(index, score, fill = book)) +
+  geom_col(show.legend = FALSE) +
+  facet_wrap(~book, ncol = 2, scales = "free_x")
+```
 
 ---
 ## Bibliography
