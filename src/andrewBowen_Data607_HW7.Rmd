@@ -163,14 +163,19 @@ j_lexicon <- j_lexicon %>%
 
 We'll be using the text of *Harry Potter and the Chamber of Secrets* in our example. We pulled the corpus from [this .rda file](https://github.com/bradleyboehmke/harrypotter/blob/master/data/chamber_of_secrets.rda) included in the `harrypotter` package. Each element in our `chamber_of_secrets` character vector is a chapter of the book. We'll use `unnest_tokens` to break out each word into it's own row of a dataframe.
 
+
+
+
 ```{r}
-philosophers_stone <- load(file="../data/philosophers_stone.rda")
-chamber_of_secrets <- load(file="../data/chamber_of_secrets.rda")
-prisoner_of_azkaban <- load(file="../data/prisoner_of_azkaban.rda")
-goblet_of_fire <- load(file="../data/goblet_of_fire.rda")
-order_of_the_phoenix <- load(file="../data/order_of_the_phoenix.rda")
-half_blood_prince <- load(file="../data/half_blood_prince.rda")
-deathly_hallows <- load(file="../data/deathly_hallows.rda")
+philosophers_stone <- load("../data/philosophers_stone.rda")
+#chamber_of_secrets <- load(file="../data/chamber_of_secrets.rda")
+#prisoner_of_azkaban <- load(file="../data/prisoner_of_azkaban.rda")
+#goblet_of_fire <- load(file="../data/goblet_of_fire.rda")
+#order_of_the_phoenix <- load(file="../data/order_of_the_phoenix.rda")
+#half_blood_prince <- load(file="../data/half_blood_prince.rda")
+#deathly_hallows <- load(file="../data/deathly_hallows.rda")
+
+#env <- readRDS("https://github.com/andrewbowen19/cunyDATA607/blob/main/src/envHW7.RData", gzip="rb")
 ```
 
 ```{r}
