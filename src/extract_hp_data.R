@@ -3,12 +3,12 @@
 library(glue)
 
 book_names <- c("philosophers_stone" = philosophers_stone, 
-                "Chamber of Secrets" = chamber_of_secrets,
-                "Prisoner of Azkaban" = prisoner_of_azkaban,
-                "Goblet of Fire" = goblet_of_fire,
-                "Order of the Phoenix" = order_of_the_phoenix,
-                "Half Blood Prince" = half_blood_prince,
-                "Deathly Hallows" = deathly_hallows)
+                "chamber_of_secrets" = chamber_of_secrets,
+                "prisoner_of_azkaban" = prisoner_of_azkaban,
+                "goblet_of_fire" = goblet_of_fire,
+                "order_of_the_phoenix" = order_of_the_phoenix,
+                "half_blood_prince" = half_blood_prince,
+                "deathly_hallows" = deathly_hallows)
 
 for (i in seq(1, length(book_names))){
   book_data <- book_names[i]
@@ -19,7 +19,9 @@ for (i in seq(1, length(book_names))){
                     mutate(book = title) %>%
                     inner_join(j_lexicon) %>%
                     count(word, score,  sort = TRUE) %>%
-                    ungroup()
+                    ungroup()  %>%
+                    left_join(j_lexicon) %>%
+                    count(book, index = c(1:nrow(df)), score)
   
   write.csv(text_df, file=glue("~/CUNY/cunyDATA607/data/harrypotter/{title}.csv"))
   
