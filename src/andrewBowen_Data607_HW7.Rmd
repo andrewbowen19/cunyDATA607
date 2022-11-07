@@ -199,23 +199,6 @@ df <- do.call(rbind, datalist)
 head(df)
 ```
 
-```{r}
-# text_cs <- tibble(chapter = seq_along(chamber_of_secrets),
-#                   text = chamber_of_secrets) %>%
-#                   unnest_tokens(word, text) %>%
-#                   mutate(book = "Chamber of Secrets")
-```
-
-Doing an inner join to get our lexicon scores matched up with the words in the text
-```{r}
-# cs_scores <- text_cs %>%
-#   inner_join(j_lexicon) %>%
-#   count(word, score,  sort = TRUE) %>%
-#   ungroup()
-```
-
-
-
 Plotting our results as done above in the Jane Austen example code - these sentiment scores per word are a bit busy. 
 ```{r}
 df %>% 
@@ -257,6 +240,18 @@ df %>%
   ggplot(aes(x = book, y = mean_score)) + geom_bar(stat='identity')
 ```
 
+Also interested to see a scatter plot of frequency of a word vs its sentiment score, to see if any relationship exists
+```{r}
+ggplot(df, aes(x = n, y = score, color=book)) +
+      geom_point()
+```
+
+using the built-in `cor` functionality to check for the correlation value between these two variables
+```{r}
+cor.test(df$n, df$score)
+```
+
+There doesn't appear to be a strong relationship between the two variables (correlation coeffcient $cor_n_s = 0.09$)
 
 ## Bibliography
 [@textMiningWithR]
