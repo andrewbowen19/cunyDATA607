@@ -1,6 +1,9 @@
 
 # Script to extract data from our .rda files and write to csvs that our RMarkdown notebook can 
 library(glue)
+library(dplyr)
+library(tidytext)
+library(tidyr)
 
 book_names <- c("philosophers_stone" = philosophers_stone, 
                 "chamber_of_secrets" = chamber_of_secrets,
@@ -10,6 +13,7 @@ book_names <- c("philosophers_stone" = philosophers_stone,
                 "half_blood_prince" = half_blood_prince,
                 "deathly_hallows" = deathly_hallows)
 
+# Grbabing data from our rda files and 
 for (i in seq(1, length(book_names))){
   book_data <- book_names[i]
   title <- names(book_names)[i]
@@ -19,11 +23,9 @@ for (i in seq(1, length(book_names))){
                     mutate(book = title) %>%
                     inner_join(j_lexicon) %>%
                     count(word, score,  sort = TRUE) %>%
-                    ungroup()  %>%
-                    left_join(j_lexicon) %>%
-                    count(book, index = c(1:nrow(df)), score)
-  
+                    ungroup()
+
   write.csv(text_df, file=glue("~/CUNY/cunyDATA607/data/harrypotter/{title}.csv"))
-  
+
 }
 

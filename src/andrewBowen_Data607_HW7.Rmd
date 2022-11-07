@@ -16,6 +16,7 @@ library(stringr)
 library(ggplot2)
 library(wordcloud)
 library(reshape2)
+library(glue)
 ```
 
 ```{r}
@@ -144,7 +145,7 @@ tidy_books %>%
 
 ```
 
----
+
 ## Part 1
 Using a different corpus and sentiment lexicon, as well as corpus. For my corpus/dataset, I chose the [Harry Potter novels](https://uc-r.github.io/sentiment_analysis), included in the `harrypotter` library. I'll also be using the [Jockers lexicon](https://rdrr.io/cran/lexicon/man/hash_sentiment_jockers_rinker.html) included in the `lexicon` package, which includes polarity scores as lookup values for 11,710 words.
 
@@ -161,86 +162,77 @@ j_lexicon <- j_lexicon %>%
           rename("word" = "x", "score" = "y")
 ```
 
-We'll be using the text of *Harry Potter and the Chamber of Secrets* in our example. We pulled the corpus from [this .rda file](https://github.com/bradleyboehmke/harrypotter/blob/master/data/chamber_of_secrets.rda) included in the `harrypotter` package. Each element in our `chamber_of_secrets` character vector is a chapter of the book. We'll use `unnest_tokens` to break out each word into it's own row of a dataframe.
+We'll be using the text of *Harry Potter and the Chamber of Secrets* in our example. We pulled the corpus from [this repo of .rda files](https://github.com/bradleyboehmke/harrypotter/blob/master/data/) included in the containing the text of each Harry Potter book (7 in total). Inorder to make this code reproducible, [I used the script `exxtract_hp_data.R`](https://github.com/andrewbowen19/cunyDATA607/blob/main/src/extract_hp_data.R) included in this repo to pull in the `.Rda` data and dump to csv files [hosted on my GitHub (broken out by chapter)](https://github.com/andrewbowen19/cunyDATA607/tree/main/data/harrypotter). 
 
+Each csv in the linked repo corresponds to one chapter of a book from the Harry Potter series. For instance, chapter 5 of the Chamber of Secrets would be contained in the [`chamber_of_secrets5.csv` file](https://github.com/andrewbowen19/cunyDATA607/blob/main/data/harrypotter/chamber_of_secrets5.csv)
 
-
-
+First, let's read in each csv file and dump them into a single dataframe, including book labels for plotting later.
 ```{r}
-philosophers_stone <- load("../data/philosophers_stone.rda")
-#chamber_of_secrets <- load(file="../data/chamber_of_secrets.rda")
-#prisoner_of_azkaban <- load(file="../data/prisoner_of_azkaban.rda")
-#goblet_of_fire <- load(file="../data/goblet_of_fire.rda")
-#order_of_the_phoenix <- load(file="../data/order_of_the_phoenix.rda")
-#half_blood_prince <- load(file="../data/half_blood_prince.rda")
-#deathly_hallows <- load(file="../data/deathly_hallows.rda")
+chapter_lengths <- c("philosophers_stone" = seq(1, 17),
+                     "chamber_of_secrets" = seq(1, 19),
+                     "prisoner_of_azkaban" = seq(1, 22),
+                     "goblet_of_fire" = seq(1, 37),
+                     "order_of_the_phoenix" = seq(1, 22),
+                     "half_blood_prince" = seq(1, 30),
+                     "deathly_hallows" = seq(1, 37)
+                     )
 
-#env <- readRDS("https://github.com/andrewbowen19/cunyDATA607/blob/main/src/envHW7.RData", gzip="rb")
+# Looping over each of our chapter files within our GitHub repo
+# appending each corresponding csv's dataframe to our overall one
+datalist = vector("list", length = length(names(chapter_lengths)))
+i <- 1
+for (chapter in names(chapter_lengths)){
+  url <- glue("https://raw.githubusercontent.com/andrewbowen19/cunyDATA607/main/data/harrypotter/{chapter}.csv", header=TRUE)
+  book_name <- str_replace_all(chapter, "\\d{1,2}", "")
+  chapter_df <- read.csv(url, sep=",",  header=TRUE) %>%
+                mutate(book = book_name)
+
+  # chapter_df$book <- seq
+  
+  datalist[[i]] <- chapter_df
+  
+  i <- i + 1
+
+}
+
+df <- do.call(rbind, datalist)
+head(df)
 ```
 
 ```{r}
-text_cs <- tibble(chapter = seq_along(chamber_of_secrets),
-                  text = chamber_of_secrets) %>%
-                  unnest_tokens(word, text) %>%
-                  mutate(book = "Chamber of Secrets")
+# text_cs <- tibble(chapter = seq_along(chamber_of_secrets),
+#                   text = chamber_of_secrets) %>%
+#                   unnest_tokens(word, text) %>%
+#                   mutate(book = "Chamber of Secrets")
 ```
 
 Doing an inner join to get our lexicon scores matched up with the words in the text
 ```{r}
-cs_scores <- text_cs %>%
-  inner_join(j_lexicon) %>%
-  count(word, score,  sort = TRUE) %>%
-  ungroup()
+# cs_scores <- text_cs %>%
+#   inner_join(j_lexicon) %>%
+#   count(word, score,  sort = TRUE) %>%
+#   ungroup()
 ```
+
+
 
 Plotting our results as done above in the Jane Austen example code - these sentiment scores per word are a bit busy. 
 ```{r}
-cs_scores %>% 
+df %>% 
       mutate(index = row_number()) %>%
       ggplot( aes(index, score)) +
         geom_col(show.legend = FALSE) 
 ```
 
-Let's re-build a lexicon with [all 7 Harry Potter Books](https://github.com/bradleyboehmke/harrypotter/tree/master/data)
-```{r}
-text_ps <- tibble(chapter = seq_along(philosophers_stone),
-                  text = philosophers_stone) %>%
-                  unnest_tokens(word, text) %>%
-                  mutate(book = "Philosopher's Stone")
-
-text_pa <- tibble(chapter = seq_along(prisoner_of_azkaban),
-                  text = prisoner_of_azkaban) %>%
-                  unnest_tokens(word, text) %>%
-                  mutate(book = "Prisoner of Azkaban")
-
-text_gf <- tibble(chapter = seq_along(goblet_of_fire),
-                  text = goblet_of_fire) %>%
-                  unnest_tokens(word, text) %>%
-                  mutate(book = "Goblet of Fire")
-
-text_op <- tibble(chapter = seq_along(order_of_the_phoenix),
-                  text = order_of_the_phoenix) %>%
-                  unnest_tokens(word, text) %>%
-                  mutate(book = "Order of the Phoenix")
-
-text_hb <- tibble(chapter = seq_along(half_blood_prince),
-                  text = half_blood_prince) %>%
-                  unnest_tokens(word, text) %>%
-                  mutate(book = "Half-Blood Prince")
-
-
-text_dh <- tibble(chapter = seq_along(deathly_hallows),
-                  text = deathly_hallows) %>%
-                  unnest_tokens(word, text) %>%
-                  mutate(book = "Deathly Hallows")
+Let's re-create the above plot with the scores colored by book.
+```{r plot-score-all-books}
+df %>% 
+      mutate(index = row_number()) %>%
+      ggplot( aes(index, score, fill=book)) +
+        geom_col( )
 ```
 
-
-```{r}
-df <- rbind(text_ps, text_cs, text_pa, text_gf, text_op, text_hb, text_dh)
-```
-
-
+Here is the same as above (sentiment scores per word per book) broken out into columns (as above)
 ```{r}
 df_sentiment <- df %>%
   left_join(j_lexicon) %>%
@@ -252,6 +244,19 @@ ggplot(df_sentiment, aes(index, score, fill = book)) +
   facet_wrap(~book, ncol = 2, scales = "free_x")
 ```
 
----
+I'd also 
+```{r sentiment-scores-hist}
+ggplot(df, aes(x=score)) + geom_histogram(binwidth=0.1)
+```
+
+
+```{r mean-score-by-book}
+df %>%
+  group_by(book) %>%
+  summarise(mean_score = mean(score)) %>%
+  ggplot(aes(x = book, y = mean_score)) + geom_bar(stat='identity')
+```
+
+
 ## Bibliography
 [@textMiningWithR]
