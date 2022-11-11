@@ -13,7 +13,8 @@ book_names <- c("philosophers_stone" = philosophers_stone,
                 "half_blood_prince" = half_blood_prince,
                 "deathly_hallows" = deathly_hallows)
 
-# Grbabing data from our rda files and 
+# Grabbing data from our rda files and 
+# We'll use `unnest_tokens` to break out each word into it's own row of a dataframe.
 for (i in seq(1, length(book_names))){
   book_data <- book_names[i]
   title <- names(book_names)[i]
