@@ -1,5 +1,6 @@
 data/*.rda
 
+data/*.rda
 *tar.gz
 projects/project4/data/
 projects/project4/data/spam_2/*
