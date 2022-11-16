@@ -1,1 +1,6 @@
 data/*.rda
+
+projects/project4/data/
+projects/project4/data/spam_2/*
+projects/project4/data/easy_ham/*
+projects/project4/data/*.tar*

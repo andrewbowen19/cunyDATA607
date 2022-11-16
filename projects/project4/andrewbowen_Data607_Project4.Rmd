@@ -1,0 +1,96 @@
+---
+title: "DATA 607 Project 4"
+author: "Andrew Bowen"
+date: "2022-11-15"
+output: html_document
+---
+
+```{r setup, message=FALSE}
+library(stringr)
+library(tensorflow)
+library(tfdatasets)
+library(keras)
+library(glue)
+
+# install_tensorflow()
+```
+
+
+I'd like to try some text classification using the `tensorflow` package in R. I'm leaning on this [tutorial page](https://tensorflow.rstudio.com/tutorials/keras/text_classification) to get some of the basics, as I've only used tensorflow in python before, not R
+```{r, message=FALSE}
+url <- "https://ai.stanford.edu/~amaas/data/sentiment/aclImdb_v1.tar.gz"
+
+dataset <- get_file(
+  "aclImdb_v1",
+  url,
+  untar = TRUE,
+  cache_dir = '.',
+  cache_subdir = ''
+)
+  
+```
+
+Loading in our [ham dataset](https://spamassassin.apache.org/old/publiccorpus/20021010_easy_ham.tar.bz2)
+```{r}
+# Loading ham dataset
+ham_url <- "https://spamassassin.apache.org/old/publiccorpus/20021010_easy_ham.tar.bz2"
+
+ham_dataset <- get_file(
+  "data/20021010_easy_ham",
+  ham_url,
+  untar = TRUE,
+  cache_dir = '.',
+  cache_subdir = ''
+)
+
+# Loading spam dataset
+spam_url <- "https://spamassassin.apache.org/old/publiccorpus/20030228_spam_2.tar.bz2"
+
+spam_dataset <- get_file(
+  "data/20030228_spam_2",
+  spam_url,
+  untar = TRUE,
+  cache_dir = '.',
+  cache_subdir = ''
+)
+```
+
+
+```{r}
+ham_dir <- file.path("easy_ham")
+spam_dir <- file.path("spam_2")
+```
+
+```{r}
+# Renaming unzipped files in our spam and ham dirs so they have a ,txt extension
+dirs <- c("spam_2", "easy_ham")
+
+for (d in dirs) {
+  dir_path <- glue("data/{d}/")
+  for (f in list.files(dir_path)) {
+   new_name <- glue("{dir_path}{f}.txt")
+   file.rename(glue("{dir_path}{f}"), new_name)
+  }
+}
+
+```
+
+Generating training datasets from our directories containing the raw text files. [`keras` looks for the sub-folders](https://datascience.stackexchange.com/questions/51671/keras-flow-from-directory-returns-0-images) within our data folder as the sub-classes
+```{r}
+seed <- 1234
+
+
+raw_train_ds <- text_dataset_from_directory(
+  'data/',
+  batch_size = 32,
+  validation_split = 0.1,
+  subset = 'training',
+  seed = seed
+)
+
+```
+
+
+
+
+

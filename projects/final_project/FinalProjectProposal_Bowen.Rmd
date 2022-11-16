@@ -1,0 +1,41 @@
+---
+title: "Andrew Bowen Data 607 Final Project Proposal"
+author: "Andrew Bowen"
+date: "2022-11-11"
+output: html_document
+---
+
+### Final Project
+
+#### Research Question
+I'm interested in seeing if environmental factors (air/water quality) has any impact on academic performance. It's well-documented that a student's performance is impacted by a [number of factors](https://www.google.com/search?client=safari&rls=en&q=factors+in+academic+performance&ie=UTF-8&oe=UTF-8).
+
+#### Datasources
+- [AQ Air QUality Public REST API](https://docs.openaq.org/reference/locations_get_v2_locations_get)
+- [NYC OPen Data Education files on test results](https://data.cityofnewyork.us/browse?category=Education&q=Test&sortBy=relevance) : while not a perfect indicator of academic performance, these do give some insight into the academic progress of students in different areas of the city.
+
+
+#### Analysis
+We will need to process each dataset in different ways. For the air quality API data, we'll need to request the relevant API endpoint and then parse the returns HTTP JSON into a nice R dataframe (se (see below). For the Education CSV files those may need to undergo some tidying/normalization. At the end we should think about joining/merging the two tables in order to have a view of the two variables (air quality and academic performance) together. 
+
+Some plots that I'd be interested in seeing are scatter plots showing exam performance as a function of local air quality. Also
+
+
+
+
+#### Sample code
+
+Example of pulling in [Air Quality data from the public-facing API](https://docs.openaq.org/reference/introduction-1). Using [this tutorial](https://www.dataquest.io/blog/r-api-tutorial/) as a sample guide
+```{r}
+library(httr)
+library(jsonlite)
+
+endpoint_url <- "https://api.openaq.org/v2/measurements?date_from=2000-01-01T00%3A00%3A00%2B00%3A00&date_to=2022-09-29T15%3A10%3A00%2B00%3A00&limit=100&page=1&offset=0&sort=desc&radius=1000&order_by=datetime"
+
+response <- GET(endpoint_url)
+
+df <- as.data.frame(fromJSON(rawToChar(response$content)))
+
+head(df)
+
+```
