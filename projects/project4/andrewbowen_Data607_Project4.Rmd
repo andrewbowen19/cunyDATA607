@@ -11,7 +11,9 @@ library(tensorflow)
 library(tfdatasets)
 library(keras)
 library(glue)
+library(ff)
 
+# Call this if you need tensorflow installed
 # install_tensorflow()
 ```
 
@@ -47,6 +49,10 @@ spam_dataset <- get_file(
 ```{r}
 ham_dir <- file.path("easy_ham")
 spam_dir <- file.path("spam_2")
+
+# Moving our dataset files toa  "Centralized" data folder
+file.move("easy_ham/", "data/easy_ham/")
+file.move("spam_2/", "data/spam_2/")
 ```
 
 ```{r}
@@ -70,21 +76,18 @@ Generating training datasets from our directories containing the raw text files.
 seed <- 1234
 
 
-raw_train_ds <- text_dataset_from_directory(
+training_data <- text_dataset_from_directory(
   'data/',
-  batch_size = 32,
+  batch_size = 64,
   validation_split = 0.1,
   subset = 'training',
   seed = seed
 )
 
-```
-
-
-```{r}
-raw_val_ds <- text_dataset_from_directory(
+# Validation data - 10% of dataset in total ( ~ 390 files)
+validation_data <- text_dataset_from_directory(
   'data/',
-  batch_size = 32,
+  batch_size = 64,
   validation_split = 0.1,
   subset = 'validation',
   seed = seed
@@ -93,9 +96,110 @@ raw_val_ds <- text_dataset_from_directory(
 
 
 ```{r}
-# Content-Transfer-Encoding: 7bit
 
+re <- reticulate::import("re")
+
+punctuation <- c("!", "\\", "\"", "#", "$", "%", "&", "'", "(", ")", "*",
+"+", ",", "-", ".", "/", ":", ";", "<", "=", ">", "?", "@", "[",
+"\\", "\\", "]", "^", "_", "`", "{", "|", "}", "~")
+punctuation_group <- punctuation %>%
+  sapply(re$escape) %>%
+  paste0(collapse = "") %>%
+  sprintf("[%s]", .)
+
+# Writing our standardization function
+standardization_function <- function(input_data) {
+  lowercase <- tf$strings$lower(input_data)
+  stripped_html <- tf$strings$regex_replace(lowercase, '<*>', ' ')
+  tf$strings$regex_replace(
+    stripped_html,
+    punctuation_group,
+    ""
+  )
+}
+
+max_features <- 10000
+sequence_length <- 250
+
+# Cleaning and tokenizing data
+vectorize_layer <- layer_text_vectorization(
+  standardize = standardization_function,
+  max_tokens = max_features,
+  output_mode = "int",
+  output_sequence_length = sequence_length
+)
 
 ```
+
+```{r}
+AUTOTUNE <- tf$data$AUTOTUNE
+
+training_data <- training %>%
+  dataset_cache() %>%
+  dataset_prefetch(buffer_size = AUTOTUNE)
+val_ds <- val_ds %>%
+  dataset_cache() %>%
+  dataset_prefetch(buffer_size = AUTOTUNE)
+test_ds <- test_ds %>%
+  dataset_cache() %>%
+  dataset_prefetch(buffer_size = AUTOTUNE)
+```
+
+
+
+
+```{r}
+# Make a text-only dataset (without labels), then call adapt
+train_text <-training_data %>%
+  dataset_map(function(text, label) text)
+vectorize_layer %>% adapt(train_text)
+```
+
+
+```{r}
+
+vectorize_text <- function(text, label) {
+  text <- tf$expand_dims(text, -1L)
+  list(vectorize_layer(text), label)
+}
+
+
+vectorize_text(training_data, "spam")
+```
+
+
+Setting up training, testing, and validation datasets
+```{r}
+train_ds <- dataset_map(training_data, vectorize_text)
+val_ds <- validation_data %>% dataset_map(vectorize_text)
+# test_ds <- raw_test_ds %>% dataset_map(vectorize_text)
+```
+
+
+```{r}
+
+model <- keras_model_sequential() %>%
+  layer_embedding(max_features + 1, 16) %>%
+  layer_dropout(0.2) %>%
+  layer_global_average_pooling_1d() %>%
+  layer_dropout(0.2) %>%
+  layer_dense(1)
+
+summary(model)
+```
+
+Need to compile our model before training the model
+```{r}
+
+model %>% compile(
+  loss = loss_binary_crossentropy(from_logits = TRUE),
+  optimizer = 'adam',
+  metrics = metric_binary_accuracy(threshold = 0)) %>%
+  fit(train_ds, validation_data = val_ds, epochs = 10)
+```
+
+
+
+
 
 
