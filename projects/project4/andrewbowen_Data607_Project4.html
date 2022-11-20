@@ -375,7 +375,9 @@ library(tensorflow)
 library(tfdatasets)
 library(keras)
 library(glue)
+library(ff)
 
+# Call this if you need tensorflow installed
 # install_tensorflow()</code></pre>
 <p>I’d like to try some text classification using the
 <code>tensorflow</code> package in R. I’m leaning on this <a href="https://tensorflow.rstudio.com/tutorials/keras/text_classification">tutorial
@@ -405,7 +407,13 @@ spam_dataset &lt;- get_file(
   cache_subdir = &#39;&#39;
 )</code></pre>
 <pre class="r"><code>ham_dir &lt;- file.path(&quot;easy_ham&quot;)
-spam_dir &lt;- file.path(&quot;spam_2&quot;)</code></pre>
+spam_dir &lt;- file.path(&quot;spam_2&quot;)
+
+# Moving our dataset files toa  &quot;Centralized&quot; data folder
+file.move(&quot;easy_ham/&quot;, &quot;data/easy_ham/&quot;)</code></pre>
+<pre><code>## [1] FALSE</code></pre>
+<pre class="r"><code>file.move(&quot;spam_2/&quot;, &quot;data/spam_2/&quot;)</code></pre>
+<pre><code>## [1] FALSE</code></pre>
 <pre class="r"><code># Renaming unzipped files in our spam and ham dirs so they have a ,txt extension
 dirs &lt;- c(&quot;spam_2&quot;, &quot;easy_ham&quot;)
 
@@ -425,21 +433,113 @@ sub-classes</p>
 <pre class="r"><code>seed &lt;- 1234
 
 
-raw_train_ds &lt;- text_dataset_from_directory(
+training_data &lt;- text_dataset_from_directory(
   &#39;data/&#39;,
-  batch_size = 32,
+  batch_size = 64,
   validation_split = 0.1,
   subset = &#39;training&#39;,
   seed = seed
-)</code></pre>
-<pre class="r"><code>raw_val_ds &lt;- text_dataset_from_directory(
+)
+
+# Validation data - 10% of dataset in total ( ~ 390 files)
+validation_data &lt;- text_dataset_from_directory(
   &#39;data/&#39;,
-  batch_size = 32,
+  batch_size = 64,
   validation_split = 0.1,
   subset = &#39;validation&#39;,
   seed = seed
 )</code></pre>
-<pre class="r"><code># Content-Transfer-Encoding: 7bit</code></pre>
+<pre class="r"><code>re &lt;- reticulate::import(&quot;re&quot;)
+
+punctuation &lt;- c(&quot;!&quot;, &quot;\\&quot;, &quot;\&quot;&quot;, &quot;#&quot;, &quot;$&quot;, &quot;%&quot;, &quot;&amp;&quot;, &quot;&#39;&quot;, &quot;(&quot;, &quot;)&quot;, &quot;*&quot;,
+&quot;+&quot;, &quot;,&quot;, &quot;-&quot;, &quot;.&quot;, &quot;/&quot;, &quot;:&quot;, &quot;;&quot;, &quot;&lt;&quot;, &quot;=&quot;, &quot;&gt;&quot;, &quot;?&quot;, &quot;@&quot;, &quot;[&quot;,
+&quot;\\&quot;, &quot;\\&quot;, &quot;]&quot;, &quot;^&quot;, &quot;_&quot;, &quot;`&quot;, &quot;{&quot;, &quot;|&quot;, &quot;}&quot;, &quot;~&quot;)
+punctuation_group &lt;- punctuation %&gt;%
+  sapply(re$escape) %&gt;%
+  paste0(collapse = &quot;&quot;) %&gt;%
+  sprintf(&quot;[%s]&quot;, .)
+
+# Writing our standardization function
+standardization_function &lt;- function(input_data) {
+  lowercase &lt;- tf$strings$lower(input_data)
+  stripped_html &lt;- tf$strings$regex_replace(lowercase, &#39;&lt;*&gt;&#39;, &#39; &#39;)
+  tf$strings$regex_replace(
+    stripped_html,
+    punctuation_group,
+    &quot;&quot;
+  )
+}
+
+max_features &lt;- 10000
+sequence_length &lt;- 250
+
+# Cleaning and tokenizing data
+vectorize_layer &lt;- layer_text_vectorization(
+  standardize = standardization_function,
+  max_tokens = max_features,
+  output_mode = &quot;int&quot;,
+  output_sequence_length = sequence_length
+)</code></pre>
+<pre class="r"><code># Make a text-only dataset (without labels), then call adapt
+train_text &lt;-training_data %&gt;%
+  dataset_map(function(text, label) text)
+vectorize_layer %&gt;% adapt(train_text)</code></pre>
+<pre class="r"><code>vectorize_text &lt;- function(text, label) {
+  text &lt;- tf$expand_dims(text, -1L)
+  list(vectorize_layer(text), label)
+}</code></pre>
+<p>Setting up training, testing, and validation datasets</p>
+<pre class="r"><code>train_ds &lt;- dataset_map(training_data, vectorize_text)
+val_ds &lt;- validation_data %&gt;% dataset_map(vectorize_text)</code></pre>
+<pre class="r"><code>model &lt;- keras_model_sequential() %&gt;%
+  layer_embedding(max_features + 1, 16) %&gt;%
+  layer_dropout(0.2) %&gt;%
+  layer_global_average_pooling_1d() %&gt;%
+  layer_dropout(0.2) %&gt;%
+  layer_dense(1)
+
+summary(model)</code></pre>
+<pre><code>## Model: &quot;sequential&quot;
+## ________________________________________________________________________________
+##  Layer (type)                       Output Shape                    Param #     
+## ================================================================================
+##  embedding (Embedding)              (None, None, 16)                160016      
+##  dropout_1 (Dropout)                (None, None, 16)                0           
+##  global_average_pooling1d (GlobalAv  (None, 16)                     0           
+##  eragePooling1D)                                                                
+##  dropout (Dropout)                  (None, 16)                      0           
+##  dense (Dense)                      (None, 1)                       17          
+## ================================================================================
+## Total params: 160,033
+## Trainable params: 160,033
+## Non-trainable params: 0
+## ________________________________________________________________________________</code></pre>
+<p>Need to <a href="https://rdrr.io/cran/kerasR/man/keras_compile.html">compile our
+model</a> before training the model. This modifies the model object
+itself</p>
+<pre class="r"><code>model %&gt;% compile(
+  loss = loss_binary_crossentropy(from_logits = TRUE), # using this loss function as it&#39;s a binary outcome datase (i.e. either ham or spam)
+  optimizer = &#39;adam&#39;,
+  metrics = metric_binary_accuracy(threshold = 0)) %&gt;%
+  fit(train_ds, validation_data = val_ds, epochs = 10)</code></pre>
+<div id="testing-our-model" class="section level3">
+<h3>Testing our Model</h3>
+<p>Now that we have our model built and fit, let’s use it to predict
+spam vs ham for some other emails. Using some samples from the <a href="https://spamassassin.apache.org/old/publiccorpus/20030228_spam.tar.bz2">default
+spam dataset</a> to set up our testing data set.</p>
+<pre class="r"><code># Setting up our testing dataset
+testing_data &lt;- text_dataset_from_directory(
+  &#39;data/test&#39;,
+  batch_size = 64
+)</code></pre>
+<p>Setting up and evaluating our testing dataset with our model</p>
+<pre class="r"><code>testing_ds &lt;- testing_data %&gt;% dataset_map(vectorize_text)
+
+# Evaluate the model
+model %&gt;% evaluate(testing_ds)</code></pre>
+<pre><code>##            loss binary_accuracy 
+##       1.8701333       0.6617843</code></pre>
+</div>
 
 
 

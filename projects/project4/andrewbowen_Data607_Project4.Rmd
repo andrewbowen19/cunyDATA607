@@ -131,20 +131,6 @@ vectorize_layer <- layer_text_vectorization(
 
 ```
 
-```{r}
-AUTOTUNE <- tf$data$AUTOTUNE
-
-training_data <- training %>%
-  dataset_cache() %>%
-  dataset_prefetch(buffer_size = AUTOTUNE)
-val_ds <- val_ds %>%
-  dataset_cache() %>%
-  dataset_prefetch(buffer_size = AUTOTUNE)
-test_ds <- test_ds %>%
-  dataset_cache() %>%
-  dataset_prefetch(buffer_size = AUTOTUNE)
-```
-
 
 
 
@@ -163,8 +149,6 @@ vectorize_text <- function(text, label) {
   list(vectorize_layer(text), label)
 }
 
-
-vectorize_text(training_data, "spam")
 ```
 
 
@@ -172,7 +156,6 @@ Setting up training, testing, and validation datasets
 ```{r}
 train_ds <- dataset_map(training_data, vectorize_text)
 val_ds <- validation_data %>% dataset_map(vectorize_text)
-# test_ds <- raw_test_ds %>% dataset_map(vectorize_text)
 ```
 
 
@@ -188,17 +171,35 @@ model <- keras_model_sequential() %>%
 summary(model)
 ```
 
-Need to compile our model before training the model
+Need to [compile our model](https://rdrr.io/cran/kerasR/man/keras_compile.html) before training the model. This modifies the model object itself
 ```{r}
 
 model %>% compile(
-  loss = loss_binary_crossentropy(from_logits = TRUE),
+  loss = loss_binary_crossentropy(from_logits = TRUE), # using this loss function as it's a binary outcome datase (i.e. either ham or spam)
   optimizer = 'adam',
   metrics = metric_binary_accuracy(threshold = 0)) %>%
   fit(train_ds, validation_data = val_ds, epochs = 10)
 ```
 
 
+
+### Testing our Model
+Now that we have our model built and fit, let's use it to predict spam vs ham for some other emails. Using some samples from the [default spam dataset](https://spamassassin.apache.org/old/publiccorpus/20030228_spam.tar.bz2) to set up our testing data set. 
+```{r}
+# Setting up our testing dataset
+testing_data <- text_dataset_from_directory(
+  'data/test',
+  batch_size = 64
+)
+```
+
+Setting up and evaluating our testing dataset with our model
+```{r}
+testing_ds <- testing_data %>% dataset_map(vectorize_text)
+
+# Evaluate the model
+model %>% evaluate(testing_ds)
+```
 
 
 
