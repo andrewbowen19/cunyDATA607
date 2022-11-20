@@ -9,5 +9,9 @@ projects/project4/data/easy_ham/*
 projects/project4/data/spam_2/
 projects/project4/data/easy_ham/
 
+projects/project4/easy_ham/
+projects/project4/spam_2/
 
+projects/project4/easy_ham/*
+projects/project4/spam_2/*
 projects/project4/data/*.tar*
