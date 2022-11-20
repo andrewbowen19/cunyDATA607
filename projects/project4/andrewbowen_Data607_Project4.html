@@ -489,7 +489,7 @@ vectorize_layer %&gt;% adapt(train_text)</code></pre>
   list(vectorize_layer(text), label)
 }</code></pre>
 <p>Setting up training, testing, and validation datasets</p>
-<pre class="r"><code>train_ds &lt;- dataset_map(training_data, vectorize_text)
+<pre class="r"><code>training_data_vectorized &lt;- dataset_map(training_data, vectorize_text)
 val_ds &lt;- validation_data %&gt;% dataset_map(vectorize_text)</code></pre>
 <pre class="r"><code>model &lt;- keras_model_sequential() %&gt;%
   layer_embedding(max_features + 1, 16) %&gt;%
@@ -521,7 +521,7 @@ itself</p>
   loss = loss_binary_crossentropy(from_logits = TRUE), # using this loss function as it&#39;s a binary outcome datase (i.e. either ham or spam)
   optimizer = &#39;adam&#39;,
   metrics = metric_binary_accuracy(threshold = 0)) %&gt;%
-  fit(train_ds, validation_data = val_ds, epochs = 10)</code></pre>
+  fit(training_data_vectorized, validation_data = val_ds, epochs = 10)</code></pre>
 <div id="testing-our-model" class="section level3">
 <h3>Testing our Model</h3>
 <p>Now that we have our model built and fit, let’s use it to predict
@@ -533,12 +533,45 @@ testing_data &lt;- text_dataset_from_directory(
   batch_size = 64
 )</code></pre>
 <p>Setting up and evaluating our testing dataset with our model</p>
-<pre class="r"><code>testing_ds &lt;- testing_data %&gt;% dataset_map(vectorize_text)
+<pre class="r"><code>testing_dataset &lt;- testing_data %&gt;% dataset_map(vectorize_text)
 
 # Evaluate the model
-model %&gt;% evaluate(testing_ds)</code></pre>
+model %&gt;% evaluate(testing_dataset)</code></pre>
 <pre><code>##            loss binary_accuracy 
-##       1.8701333       0.6617843</code></pre>
+##       1.9279082       0.6644474</code></pre>
+<p>Our accuracy of 66% leaves a bit to be desired.</p>
+<pre class="r"><code>model_sgd &lt;- keras_model_sequential() %&gt;%
+  layer_embedding(max_features + 1, 16) %&gt;%
+  layer_dropout(0.2) %&gt;%
+  layer_global_average_pooling_1d() %&gt;%
+  layer_dropout(0.2) %&gt;%
+  layer_dense(1)
+
+summary(model_sgd)</code></pre>
+<pre><code>## Model: &quot;sequential_1&quot;
+## ________________________________________________________________________________
+##  Layer (type)                       Output Shape                    Param #     
+## ================================================================================
+##  embedding_1 (Embedding)            (None, None, 16)                160016      
+##  dropout_3 (Dropout)                (None, None, 16)                0           
+##  global_average_pooling1d_1 (Global  (None, 16)                     0           
+##  AveragePooling1D)                                                              
+##  dropout_2 (Dropout)                (None, 16)                      0           
+##  dense_1 (Dense)                    (None, 1)                       17          
+## ================================================================================
+## Total params: 160,033
+## Trainable params: 160,033
+## Non-trainable params: 0
+## ________________________________________________________________________________</code></pre>
+<pre class="r"><code># Compiling our model with an SGD optimizer
+model_sgd %&gt;% compile(
+  loss = loss_binary_crossentropy(from_logits = TRUE),
+  optimizer = &#39;SGD&#39;,
+  metrics = metric_binary_accuracy(threshold = 0)) %&gt;%
+  fit(training_data_vectorized, validation_data = val_ds, epochs = 20)</code></pre>
+<pre class="r"><code>model_sgd %&gt;% evaluate(testing_dataset)</code></pre>
+<pre><code>##            loss binary_accuracy 
+##       0.6457267       0.6671105</code></pre>
 </div>
 
 

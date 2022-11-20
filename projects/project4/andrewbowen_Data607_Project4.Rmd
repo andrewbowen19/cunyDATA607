@@ -154,7 +154,7 @@ vectorize_text <- function(text, label) {
 
 Setting up training, testing, and validation datasets
 ```{r}
-train_ds <- dataset_map(training_data, vectorize_text)
+training_data_vectorized <- dataset_map(training_data, vectorize_text)
 val_ds <- validation_data %>% dataset_map(vectorize_text)
 ```
 
@@ -178,7 +178,7 @@ model %>% compile(
   loss = loss_binary_crossentropy(from_logits = TRUE), # using this loss function as it's a binary outcome datase (i.e. either ham or spam)
   optimizer = 'adam',
   metrics = metric_binary_accuracy(threshold = 0)) %>%
-  fit(train_ds, validation_data = val_ds, epochs = 10)
+  fit(training_data_vectorized, validation_data = val_ds, epochs = 10)
 ```
 
 
@@ -195,10 +195,36 @@ testing_data <- text_dataset_from_directory(
 
 Setting up and evaluating our testing dataset with our model
 ```{r}
-testing_ds <- testing_data %>% dataset_map(vectorize_text)
+testing_dataset <- testing_data %>% dataset_map(vectorize_text)
 
 # Evaluate the model
-model %>% evaluate(testing_ds)
+model %>% evaluate(testing_dataset)
+```
+
+
+Our accuracy of 66% leaves a bit to be desired. 
+```{r}
+model_sgd <- keras_model_sequential() %>%
+  layer_embedding(max_features + 1, 16) %>%
+  layer_dropout(0.2) %>%
+  layer_global_average_pooling_1d() %>%
+  layer_dropout(0.2) %>%
+  layer_dense(1)
+
+summary(model_sgd)
+
+# Compiling our model with an SGD optimizer
+model_sgd %>% compile(
+  loss = loss_binary_crossentropy(from_logits = TRUE),
+  optimizer = 'SGD',
+  metrics = metric_binary_accuracy(threshold = 0)) %>%
+  fit(training_data_vectorized, validation_data = val_ds, epochs = 20)
+```
+
+
+```{r}
+
+model_sgd %>% evaluate(testing_dataset)
 ```
 
 
