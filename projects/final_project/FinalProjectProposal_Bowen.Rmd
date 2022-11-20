@@ -8,24 +8,22 @@ output: html_document
 ### Final Project
 
 #### Research Question
-I'm interested in seeing if environmental factors (air/water quality) has any impact on academic performance. It's well-documented that a student's performance is impacted by a [number of factors](https://www.google.com/search?client=safari&rls=en&q=factors+in+academic+performance&ie=UTF-8&oe=UTF-8).
+I'm interested in seeing if environmental factors (air/water quality) has any impact on academic performance. It's well-documented that a student's performance is impacted by a [number of factors](https://www.google.com/search?client=safari&rls=en&q=factors+in+academic+performance&ie=UTF-8&oe=UTF-8). However, I want to double-check that air quality also correlates with academic performance as well. 
 
 #### Datasources
-- [AQ Air QUality Public REST API](https://docs.openaq.org/reference/locations_get_v2_locations_get)
-- [NYC OPen Data Education files on test results](https://data.cityofnewyork.us/browse?category=Education&q=Test&sortBy=relevance) : while not a perfect indicator of academic performance, these do give some insight into the academic progress of students in different areas of the city.
+- [AQ Air Quality Public REST API](https://docs.openaq.org/reference/introduction-1)
+- [NYC Open Data Education files on test results](https://data.cityofnewyork.us/browse?category=Education&q=Test&sortBy=relevance) : while not a perfect indicator of academic performance, these do give some insight into the academic progress of students in different areas of the city.
 
 
 #### Analysis
-We will need to process each dataset in different ways. For the air quality API data, we'll need to request the relevant API endpoint and then parse the returns HTTP JSON into a nice R dataframe (se (see below). For the Education CSV files those may need to undergo some tidying/normalization. At the end we should think about joining/merging the two tables in order to have a view of the two variables (air quality and academic performance) together. 
+We will need to process each data set in different ways. For the air quality API data, we'll need to request the relevant API endpoint and then parse the returns HTTP JSON into a nice R dataframe (see below). Once these JSON responses are read into an R dataframe, I will write them to CSV files posted on GitHub for further analysis. This should help in the way of reusability. For the Education CSV files those may need to undergo some tidying/normalization. At the end we should think about joining/merging the two tables in order to have a view of the two variables (air quality and academic performance) together. In this case, joining on a location code (zip code/borough code) would be done to merge in these datasets.
 
-Some plots that I'd be interested in seeing are scatter plots showing exam performance as a function of local air quality. Also
-
-
+Some plots that I'd be interested in seeing are scatter plots showing exam performance as a function of local air quality. Also, running a correlation test on these data would be interesting to show a relationship. There are so many [inputs that impact academic performance](https://files.eric.ed.gov/fulltext/EJ1300829.pdf) that, in this case, demonstrating a correlation between our cleaned data may be the most that we can show. In other words, demonstrating a truly causal relationship between these two variables may not be feasible. 
 
 
 #### Sample code
 
-Example of pulling in [Air Quality data from the public-facing API](https://docs.openaq.org/reference/introduction-1). Using [this tutorial](https://www.dataquest.io/blog/r-api-tutorial/) as a sample guide
+Example of pulling in [Air Quality data from the public-facing API](https://docs.openaq.org/reference/introduction-1). Using [this tutorial](https://www.dataquest.io/blog/r-api-tutorial/) as a sample guide for requesting API data in R. 
 ```{r}
 library(httr)
 library(jsonlite)
