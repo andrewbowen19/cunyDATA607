@@ -538,7 +538,7 @@ testing_data &lt;- text_dataset_from_directory(
 # Evaluate the model
 model %&gt;% evaluate(testing_dataset)</code></pre>
 <pre><code>##            loss binary_accuracy 
-##       1.9279082       0.6644474</code></pre>
+##       1.9330244       0.6644474</code></pre>
 <p>Our accuracy of 66% leaves a bit to be desired.</p>
 <pre class="r"><code>model_sgd &lt;- keras_model_sequential() %&gt;%
   layer_embedding(max_features + 1, 16) %&gt;%
@@ -571,7 +571,7 @@ model_sgd %&gt;% compile(
   fit(training_data_vectorized, validation_data = val_ds, epochs = 20)</code></pre>
 <pre class="r"><code>model_sgd %&gt;% evaluate(testing_dataset)</code></pre>
 <pre><code>##            loss binary_accuracy 
-##       0.6457267       0.6671105</code></pre>
+##       0.6444830       0.6671105</code></pre>
 </div>
 
 

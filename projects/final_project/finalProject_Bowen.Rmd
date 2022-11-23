@@ -1,0 +1,35 @@
+---
+title: "DATA 607 Final Project"
+author: "Andrew Bowen"
+date: "2022-11-23"
+output: ioslides_presentation
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+## Motivation
+
+- **Research Question**: Do environmental factors (like air quality) impact a student's academic performance?
+
+
+
+## Slide with Bullets
+
+- Bullet 1
+- Bullet 2
+- Bullet 3
+
+## Slide with R Output
+
+```{r cars, echo = TRUE}
+summary(cars)
+```
+
+## Slide with Plot
+
+```{r pressure}
+plot(pressure)
+```
+
