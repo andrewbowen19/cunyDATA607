@@ -29,16 +29,15 @@ library(sf) # for geospatial data lookup
 url <- "https://api.openaq.org/v2/measurements"
 
 queryString <- list(
-  # limit = "100",
-  # page = "1",
-  # offset = "0",
   sort = "desc",
   radius = "1000",
   order_by = "datetime",
   city = "New York"
 )
 
-response <- VERB("GET", url, query = queryString, content_type("application/octet-stream"), accept("application/json"))
+response <- VERB("GET", url, query = queryString,
+                 content_type("application/octet-stream"),
+                 accept("application/json"))
 
 as.data.frame(fromJSON(rawToChar(content(response, "raw"))))
 ```
@@ -89,7 +88,7 @@ school_locs$DBN <- str_replace_all(school_locs$DBN, "\\s+", "")
 ```
 
 ## Joining & Cleaning Academic Data
-Let's oin our `school_locs` dataframe to our `tests` 
+Let's join our `school_locs` dataframe to our `tests` 
 ```{r}
 school_data <- left_join(tests, school_locs, by="DBN")
 ```

@@ -3230,16 +3230,15 @@ slide:not(.current) .plotly.html-widget{
 <pre class = 'prettyprint lang-r'>url &lt;- &quot;https://api.openaq.org/v2/measurements&quot;
 
 queryString &lt;- list(
-  # limit = &quot;100&quot;,
-  # page = &quot;1&quot;,
-  # offset = &quot;0&quot;,
   sort = &quot;desc&quot;,
   radius = &quot;1000&quot;,
   order_by = &quot;datetime&quot;,
   city = &quot;New York&quot;
 )
 
-response &lt;- VERB(&quot;GET&quot;, url, query = queryString, content_type(&quot;application/octet-stream&quot;), accept(&quot;application/json&quot;))
+response &lt;- VERB(&quot;GET&quot;, url, query = queryString,
+                 content_type(&quot;application/octet-stream&quot;),
+                 accept(&quot;application/json&quot;))
 
 as.data.frame(fromJSON(rawToChar(content(response, &quot;raw&quot;))))</pre>
 
@@ -3289,7 +3288,7 @@ head(tests)</pre>
 
 </article></slide><slide class=""><hgroup><h2>Joining &amp; Cleaning Academic Data</h2></hgroup><article  id="joining-cleaning-academic-data">
 
-<p>Let’s oin our <code>school_locs</code> dataframe to our <code>tests</code></p></article></slide>
+<p>Let’s join our <code>school_locs</code> dataframe to our <code>tests</code></p></article></slide>
 
 
   <slide class="backdrop"></slide>
