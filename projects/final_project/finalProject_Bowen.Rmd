@@ -16,7 +16,6 @@ library(tidyverse)
 library(sf) # for geospatial data lookup
 ```
 ## Motivation
-
 - **Research Question**: Do environmental factors (like air quality) impact a student's academic performance?
 
 
@@ -25,17 +24,32 @@ library(sf) # for geospatial data lookup
 - [AQ Air Quality Public REST API](https://docs.openaq.org/reference/introduction-1)
 - [NYC Open Data Education files on test results](https://data.cityofnewyork.us/browse?category=Education&q=Test&sortBy=relevance) : while not a perfect indicator of academic performance, these do give some insight into the academic progress of students in different areas of the city.
 
-## Pulling Air Quality Data
+## Pulling Air Quality Data for New York City
 ```{r, echo=TRUE}
-# AQ API data
-endpoint_url <- "https://api.openaq.org/v2/measurements?date_from=2000-01-01T00%3A00%3A00%2B00%3A00&date_to=2022-09-29T15%3A10%3A00%2B00%3A00&limit=100&page=1&offset=0&sort=desc&radius=1000&order_by=datetime"
+url <- "https://api.openaq.org/v2/measurements"
 
-response <- GET(endpoint_url)
+queryString <- list(
+  # limit = "100",
+  # page = "1",
+  # offset = "0",
+  sort = "desc",
+  radius = "1000",
+  order_by = "datetime",
+  city = "New York"
+)
 
-df <- as.data.frame(fromJSON(rawToChar(response$content)))
+response <- VERB("GET", url, query = queryString, content_type("application/octet-stream"), accept("application/json"))
 
-head(df)
+as.data.frame(fromJSON(rawToChar(content(response, "raw"))))
 ```
+
+## Cleaning Air Quality Data
+```{r}
+
+```
+
+
+
 ## Academic Performance Data
 - [Dataset from NYC Open Data](https://data.cityofnewyork.us/Education/2006-2012-Math-Test-Results-All-Students/3mrr-8h5c/data) (csv) -- test results by student.
 - Can use District Borough Number (DBN) to lookup geographic locations and compare against AQ data
@@ -52,13 +66,32 @@ head(tests)
 
 
 ## Getting School Geospatial Data
-Looking up [school district GIS data from NYC Open Data](https://data.cityofnewyork.us/Education/School-Districts/r8nu-ymqj). School point locations can be found [here](https://data.cityofnewyork.us/Education/School-Point-Locations/jfju-ynrr)
-```{r, echo=TRUE}
+Looking up [school district GIS data from NYC Open Data](https://data.cityofnewyork.us/Education/School-Districts/r8nu-ymqj). School point locations can be found [here](https://data.cityofnewyork.us/Education/School-Point-Locations/jfju-ynrr), we'll download them and unzip the file to get the shp file
+```{r}
+# Create temporary files
+temp <- tempfile()
+temp2 <- tempfile()
 
+# Download the zip file and save to 'temp' 
+school_locs_url <- "https://data.cityofnewyork.us/download/jfju-ynrr/application%2Fzip"
+download.file(school_locs_url, temp)
+
+# Unzip the folder contents and then read in the shp file to a dataframe
+unzip(zipfile = temp, exdir = temp2)
+school_locs <- sf::read_sf(temp2)
 ```
 
+```{r}
+# Cleaning and re-naming the ATS_CODE column to 
+school_locs <- school_locs %>% 
+                  dplyr::rename( "DBN"="ATS_CODE")
+school_locs$DBN <- str_replace_all(school_locs$DBN, "\\s+", "")
+```
 
-
-
+## Joining & Cleaning Academic Data
+Let's oin our `school_locs` dataframe to our `tests` 
+```{r}
+school_data <- left_join(tests, school_locs, by="DBN")
+```
 
 

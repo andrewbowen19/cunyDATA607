@@ -3225,66 +3225,28 @@ slide:not(.current) .plotly.html-widget{
 <li><a href='https://data.cityofnewyork.us/browse?category=Education&amp;q=Test&amp;sortBy=relevance' title=''>NYC Open Data Education files on test results</a> : while not a perfect indicator of academic performance, these do give some insight into the academic progress of students in different areas of the city.</li>
 </ul>
 
-</article></slide><slide class=""><hgroup><h2>Pulling Air Quality Data</h2></hgroup><article  id="pulling-air-quality-data">
+</article></slide><slide class=""><hgroup><h2>Pulling Air Quality Data for New York City</h2></hgroup><article  id="pulling-air-quality-data-for-new-york-city">
 
-<pre class = 'prettyprint lang-r'># AQ API data
-endpoint_url &lt;- &quot;https://api.openaq.org/v2/measurements?date_from=2000-01-01T00%3A00%3A00%2B00%3A00&amp;date_to=2022-09-29T15%3A10%3A00%2B00%3A00&amp;limit=100&amp;page=1&amp;offset=0&amp;sort=desc&amp;radius=1000&amp;order_by=datetime&quot;
+<pre class = 'prettyprint lang-r'>url &lt;- &quot;https://api.openaq.org/v2/measurements&quot;
 
-response &lt;- GET(endpoint_url)
+queryString &lt;- list(
+  # limit = &quot;100&quot;,
+  # page = &quot;1&quot;,
+  # offset = &quot;0&quot;,
+  sort = &quot;desc&quot;,
+  radius = &quot;1000&quot;,
+  order_by = &quot;datetime&quot;,
+  city = &quot;New York&quot;
+)
 
-df &lt;- as.data.frame(fromJSON(rawToChar(response$content)))
+response &lt;- VERB(&quot;GET&quot;, url, query = queryString, content_type(&quot;application/octet-stream&quot;), accept(&quot;application/json&quot;))
 
-head(df)</pre>
+as.data.frame(fromJSON(rawToChar(content(response, &quot;raw&quot;))))</pre>
 
-<pre >##    meta.name meta.license   meta.website meta.page meta.limit  meta.found
-## 1 openaq-api   CC BY 4.0d api.openaq.org         1        100 82493574767
-## 2 openaq-api   CC BY 4.0d api.openaq.org         1        100 82493574767
-## 3 openaq-api   CC BY 4.0d api.openaq.org         1        100 82493574767
-## 4 openaq-api   CC BY 4.0d api.openaq.org         1        100 82493574767
-## 5 openaq-api   CC BY 4.0d api.openaq.org         1        100 82493574767
-## 6 openaq-api   CC BY 4.0d api.openaq.org         1        100 82493574767
-##   results.locationId
-## 1             352655
-## 2             355599
-## 3              63782
-## 4             232584
-## 5              67604
-## 6             354216
-##                                                      results.location
-## 1                                                          Orca House
-## 2                                                             Newport
-## 3 Kangerlussuaq, Greenland - University of Michigan Climate and Space
-## 4                                                   200 Eugene Street
-## 5                                                        AQMD_NASA_47
-## 6                                                                 DRN
-##   results.parameter results.value          results.date.utc
-## 1             um100           0.0 2022-09-29T15:10:00+00:00
-## 2              pm10          32.3 2022-09-29T15:10:00+00:00
-## 3               pm1           0.0 2022-09-29T15:10:00+00:00
-## 4               pm1           4.9 2022-09-29T15:10:00+00:00
-## 5             um100           0.0 2022-09-29T15:10:00+00:00
-## 6              pm25           6.5 2022-09-29T15:10:00+00:00
-##          results.date.local  results.unit results.coordinates.latitude
-## 1 2022-09-29T07:10:00-08:00 particles/cm³                     61.20671
-## 2 2022-09-29T08:10:00-07:00         µg/m³                     44.64564
-## 3 2022-09-29T13:10:00-02:00         µg/m³                     66.99600
-## 4 2022-09-29T08:10:00-07:00         µg/m³                     45.70640
-## 5 2022-09-29T08:10:00-07:00 particles/cm³                     34.26168
-## 6 2022-09-29T14:10:00-01:00         µg/m³                     40.91193
-##   results.coordinates.longitude results.country results.city results.isMobile
-## 1                    -149.85483              US           NA            FALSE
-## 2                    -124.05934            &lt;NA&gt;           NA            FALSE
-## 3                     -50.62150              GL           NA            FALSE
-## 4                    -121.51236              US           NA            FALSE
-## 5                    -117.20624              US           NA            FALSE
-## 6                     -79.90574              US           NA            FALSE
-##   results.isAnalysis results.entity results.sensorType
-## 1                 NA      community    low-cost sensor
-## 2                 NA      community    low-cost sensor
-## 3              FALSE      community    low-cost sensor
-## 4                 NA      community    low-cost sensor
-## 5              FALSE      community    low-cost sensor
-## 6                 NA      community    low-cost sensor</pre>
+<pre >##                 message
+## 1 internal server error</pre>
+
+</article></slide><slide class=""><hgroup><h2>Cleaning Air Quality Data</h2></hgroup><article  id="cleaning-air-quality-data">
 
 </article></slide><slide class=""><hgroup><h2>Academic Performance Data</h2></hgroup><article  id="academic-performance-data">
 
@@ -3323,7 +3285,11 @@ head(tests)</pre>
 
 </article></slide><slide class=""><hgroup><h2>Getting School Geospatial Data</h2></hgroup><article  id="getting-school-geospatial-data">
 
-<p>Looking up <a href='https://data.cityofnewyork.us/Education/School-Districts/r8nu-ymqj' title=''>school district GIS data from NYC Open Data</a>. School point locations can be found <a href='https://data.cityofnewyork.us/Education/School-Point-Locations/jfju-ynrr' title=''>here</a></p></article></slide>
+<p>Looking up <a href='https://data.cityofnewyork.us/Education/School-Districts/r8nu-ymqj' title=''>school district GIS data from NYC Open Data</a>. School point locations can be found <a href='https://data.cityofnewyork.us/Education/School-Point-Locations/jfju-ynrr' title=''>here</a>, we’ll download them and unzip the file to get the shp file</p>
+
+</article></slide><slide class=""><hgroup><h2>Joining &amp; Cleaning Academic Data</h2></hgroup><article  id="joining-cleaning-academic-data">
+
+<p>Let’s oin our <code>school_locs</code> dataframe to our <code>tests</code></p></article></slide>
 
 
   <slide class="backdrop"></slide>
