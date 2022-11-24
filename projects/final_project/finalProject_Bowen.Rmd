@@ -9,27 +9,56 @@ output: ioslides_presentation
 knitr::opts_chunk$set(echo = FALSE)
 ```
 
+```{r, echo=FALSE, message=FALSE}
+library(httr)
+library(jsonlite)
+library(tidyverse)
+library(sf) # for geospatial data lookup
+```
 ## Motivation
 
 - **Research Question**: Do environmental factors (like air quality) impact a student's academic performance?
 
 
 
-## Slide with Bullets
+## Datasources
+- [AQ Air Quality Public REST API](https://docs.openaq.org/reference/introduction-1)
+- [NYC Open Data Education files on test results](https://data.cityofnewyork.us/browse?category=Education&q=Test&sortBy=relevance) : while not a perfect indicator of academic performance, these do give some insight into the academic progress of students in different areas of the city.
 
-- Bullet 1
-- Bullet 2
-- Bullet 3
+## Pulling Air Quality Data
+```{r, echo=TRUE}
+# AQ API data
+endpoint_url <- "https://api.openaq.org/v2/measurements?date_from=2000-01-01T00%3A00%3A00%2B00%3A00&date_to=2022-09-29T15%3A10%3A00%2B00%3A00&limit=100&page=1&offset=0&sort=desc&radius=1000&order_by=datetime"
 
-## Slide with R Output
+response <- GET(endpoint_url)
 
-```{r cars, echo = TRUE}
-summary(cars)
+df <- as.data.frame(fromJSON(rawToChar(response$content)))
+
+head(df)
+```
+## Academic Performance Data
+- [Dataset from NYC Open Data](https://data.cityofnewyork.us/Education/2006-2012-Math-Test-Results-All-Students/3mrr-8h5c/data) (csv) -- test results by student.
+- Can use District Borough Number (DBN) to lookup geographic locations and compare against AQ data
+```{r, echo=TRUE}
+dbn_url <- "https://raw.githubusercontent.com/andrewbowen19/cunyDATA607/main/projects/final_project/2006_-_2012__Math_Test_Results__-_All_Students.csv"
+
+tests <- read.csv(dbn_url)
+
+head(tests)
+
+
 ```
 
-## Slide with Plot
 
-```{r pressure}
-plot(pressure)
+
+## Getting School Geospatial Data
+Looking up [school district GIS data from NYC Open Data](https://data.cityofnewyork.us/Education/School-Districts/r8nu-ymqj). School point locations can be found [here](https://data.cityofnewyork.us/Education/School-Point-Locations/jfju-ynrr)
+```{r, echo=TRUE}
+
 ```
+
+
+
+
+
 
