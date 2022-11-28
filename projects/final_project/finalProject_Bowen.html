@@ -3222,30 +3222,9 @@ slide:not(.current) .plotly.html-widget{
 
 <ul>
 <li><a href='https://docs.openaq.org/reference/introduction-1' title=''>AQ Air Quality Public REST API</a></li>
+<li><a href='https://openweathermap.org/api' title=''>Open Weather Map API</a></li>
 <li><a href='https://data.cityofnewyork.us/browse?category=Education&amp;q=Test&amp;sortBy=relevance' title=''>NYC Open Data Education files on test results</a> : while not a perfect indicator of academic performance, these do give some insight into the academic progress of students in different areas of the city.</li>
 </ul>
-
-</article></slide><slide class=""><hgroup><h2>Pulling Air Quality Data for New York City</h2></hgroup><article  id="pulling-air-quality-data-for-new-york-city">
-
-<pre class = 'prettyprint lang-r'>url &lt;- &quot;https://api.openaq.org/v2/measurements&quot;
-
-queryString &lt;- list(
-  sort = &quot;desc&quot;,
-  radius = &quot;1000&quot;,
-  order_by = &quot;datetime&quot;,
-  city = &quot;New York&quot;
-)
-
-response &lt;- VERB(&quot;GET&quot;, url, query = queryString,
-                 content_type(&quot;application/octet-stream&quot;),
-                 accept(&quot;application/json&quot;))
-
-as.data.frame(fromJSON(rawToChar(content(response, &quot;raw&quot;))))</pre>
-
-<pre >##                 message
-## 1 internal server error</pre>
-
-</article></slide><slide class=""><hgroup><h2>Cleaning Air Quality Data</h2></hgroup><article  id="cleaning-air-quality-data">
 
 </article></slide><slide class=""><hgroup><h2>Academic Performance Data</h2></hgroup><article  id="academic-performance-data">
 
@@ -3288,7 +3267,15 @@ head(tests)</pre>
 
 </article></slide><slide class=""><hgroup><h2>Joining &amp; Cleaning Academic Data</h2></hgroup><article  id="joining-cleaning-academic-data">
 
-<p>Let’s join our <code>school_locs</code> dataframe to our <code>tests</code></p></article></slide>
+<p>Let’s join our <code>school_locs</code> dataframe to our <code>tests</code></p>
+
+</article></slide><slide class=""><hgroup><h2>Pulling Air Quality Data for New York City</h2></hgroup><article  id="pulling-air-quality-data-for-new-york-city">
+
+<p>Looking up air quality for school locations in <a href='https://www.latlong.net/place/new-york-city-ny-usa-1848.html' title=''>New York’s geographical area</a>. Using my free API key from <a href='https://openweathermap.org/api' title=''>the Open Weather Map API</a>. Setting this as an environment variable</p>
+
+</article></slide><slide class=""><hgroup><h2>Cleaning Air Quality Data</h2></hgroup><article  id="cleaning-air-quality-data">
+
+<p>First, we’ll need to pull latitudes and longitudes from our <code>school_data</code> dataframe to pass to our <code>lookupAQ</code></p></article></slide>
 
 
   <slide class="backdrop"></slide>

@@ -14,40 +14,15 @@ library(httr)
 library(jsonlite)
 library(tidyverse)
 library(sf) # for geospatial data lookup
+library(glue)
 ```
 ## Motivation
 - **Research Question**: Do environmental factors (like air quality) impact a student's academic performance?
 
-
-
 ## Datasources
 - [AQ Air Quality Public REST API](https://docs.openaq.org/reference/introduction-1)
+- [Open Weather Map API](https://openweathermap.org/api)
 - [NYC Open Data Education files on test results](https://data.cityofnewyork.us/browse?category=Education&q=Test&sortBy=relevance) : while not a perfect indicator of academic performance, these do give some insight into the academic progress of students in different areas of the city.
-
-## Pulling Air Quality Data for New York City
-```{r, echo=TRUE}
-url <- "https://api.openaq.org/v2/measurements"
-
-queryString <- list(
-  sort = "desc",
-  radius = "1000",
-  order_by = "datetime",
-  city = "New York"
-)
-
-response <- VERB("GET", url, query = queryString,
-                 content_type("application/octet-stream"),
-                 accept("application/json"))
-
-as.data.frame(fromJSON(rawToChar(content(response, "raw"))))
-```
-
-## Cleaning Air Quality Data
-```{r}
-
-```
-
-
 
 ## Academic Performance Data
 - [Dataset from NYC Open Data](https://data.cityofnewyork.us/Education/2006-2012-Math-Test-Results-All-Students/3mrr-8h5c/data) (csv) -- test results by student.
@@ -58,8 +33,6 @@ dbn_url <- "https://raw.githubusercontent.com/andrewbowen19/cunyDATA607/main/pro
 tests <- read.csv(dbn_url)
 
 head(tests)
-
-
 ```
 
 
@@ -85,6 +58,12 @@ school_locs <- sf::read_sf(temp2)
 school_locs <- school_locs %>% 
                   dplyr::rename( "DBN"="ATS_CODE")
 school_locs$DBN <- str_replace_all(school_locs$DBN, "\\s+", "")
+
+# Projected CRS: NAD83
+school_locs_sf <- st_as_sf(school_locs, coords=c("YCoord", "XCoord"), NAD83)
+
+school_locs <- st_transform(school_locs_sf, crs = 4326 ) %>%
+      mutate( lat = st_coordinates(.)[,2],lon = st_coordinates(.)[,1])
 ```
 
 ## Joining & Cleaning Academic Data
@@ -92,5 +71,35 @@ Let's join our `school_locs` dataframe to our `tests`
 ```{r}
 school_data <- left_join(tests, school_locs, by="DBN")
 ```
+
+## Pulling Air Quality Data for New York City
+
+Looking up air quality for school locations in [New York's geographical area](https://www.latlong.net/place/new-york-city-ny-usa-1848.html). Using my free API key from [the Open Weather Map API](https://openweathermap.org/api). Setting this as an environment variable
+```{r}
+
+# 
+apiKey <- "bdc4c7c62b4bc1c3ed4b23e368d93e8f"# Sys.getenv("OPENWEATHER_API_KEY")
+
+
+lookupAQ <- function(lat, lon){
+  url <- glue("http://api.openweathermap.org/data/2.5/air_pollution/history?lat={lat}&lon={lon}&start=1262322000&end=1641013200&appid={apiKey}")
+  
+  response <- VERB("GET", url)
+
+  aq_df <- as.data.frame(fromJSON(content(response, "text")))
+
+}
+```
+
+
+## Cleaning Air Quality Data
+First, we'll need to pull latitudes and longitudes from our `school_data` dataframe to pass to our `lookupAQ` 
+```{r}
+
+```
+
+
+
+
 
 
