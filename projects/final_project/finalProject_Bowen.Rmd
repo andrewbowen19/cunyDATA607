@@ -76,29 +76,68 @@ school_data <- left_join(tests, school_locs, by="DBN")
 
 Looking up air quality for school locations in [New York's geographical area](https://www.latlong.net/place/new-york-city-ny-usa-1848.html). Using my free API key from [the Open Weather Map API](https://openweathermap.org/api). Setting this as an environment variable
 ```{r}
+# Reading our API key via environment variable. This will be included in submission for reproduction
+apiKey <- "bdc4c7c62b4bc1c3ed4b23e368d93e8f"#Sys.getenv("OPENWEATHER_API_KEY")
 
-# 
-apiKey <- "bdc4c7c62b4bc1c3ed4b23e368d93e8f"# Sys.getenv("OPENWEATHER_API_KEY")
-
-
-lookupAQ <- function(lat, lon){
-  url <- glue("http://api.openweathermap.org/data/2.5/air_pollution/history?lat={lat}&lon={lon}&start=1262322000&end=1641013200&appid={apiKey}")
+# TODO: update return type (just aggregated AQ rating)
+lookupAQ <- function(lat, lon, year=2022){
+  
+  start_time <- as.numeric(as.POSIXct(glue("{year}-01-01 0:00:00 EST")))
+  end_time <- as.numeric(as.POSIXct(glue("{year}-12-31 23:59:59 EST")))
+  url <- glue("http://api.openweathermap.org/data/2.5/air_pollution/history?lat={lat}&lon={lon}&start={start_time}&end={end_time}&appid={apiKey}")
+  print(url)
+  
+  query = list(
+    appID = apiKey, 
+    
+  )
   
   response <- VERB("GET", url)
 
-  aq_df <- as.data.frame(fromJSON(content(response, "text")))
-
+  return(aq_df <- as.data.frame(fromJSON(content(response, "text"))))
 }
+
+sample_aq <- lookupAQ(40.72189, 73.978, 2021)
+
 ```
 
 
 ## Cleaning Air Quality Data
 First, we'll need to pull latitudes and longitudes from our `school_data` dataframe to pass to our `lookupAQ` 
 ```{r}
+# TODO: figure out how we want to format return  types 
 
+# Grouping by school and aggregating over year to minimize API calls
+# school_data$Mean.Scale.Score = as.double(school_data$Mean.Scale.Score)
+# school_data <- school_data %>%
+#                 filter(!is.na(Mean.Scale.Score) & Mean.Scale.Score != "s") %>%
+#                 mutate(mean_scaled_score = as.double(Mean.Scale.Score))
+
+head(school_data)
+# school_data$aq <- mapply(FUN=lookupAQ, lat =school_data$lat, lon=school_data$lon, year=school_data$Year)
+```
+
+Looking up Air Quality data for each school in our sample
+```{r}
+# Calling AQ API for data by school
+aq_lookup <- mapply(FUN=lookupAQ, lat=school_data$lat, lon=school_data$lon,     year=school_data$Year)
+```
+
+```{r}
+library(purrr)
+
+school_sample <- school_data[c(1:10), ] %>%
+                  mutate(lat = round(lat, 4), lon = round(lon, 4))
+
+map_dfr(school_sample$lat, lookupAQ, lon=school_sample$lon, year=school_sample$Year)
 ```
 
 
+
+```{r}
+# Writing to CSV file to avoid future API calls in our analysis
+# write.csv("school_aq_data.csv")
+```
 
 
 
