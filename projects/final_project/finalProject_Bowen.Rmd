@@ -69,7 +69,7 @@ school_locs <- st_transform(school_locs_sf, crs = 4326 ) %>%
 ## Joining & Cleaning Academic Data
 Let's join our `school_locs` dataframe to our `tests` 
 ```{r}
-school_data <- left_join(tests, school_locs, by="DBN")
+school_data <- as.data.frame(left_join(tests, school_locs, by="DBN"))
 ```
 
 ## Pulling Air Quality Data for New York City
@@ -84,59 +84,58 @@ lookupAQ <- function(lat, lon, year=2022){
   
   start_time <- as.numeric(as.POSIXct(glue("{year}-01-01 0:00:00 EST")))
   end_time <- as.numeric(as.POSIXct(glue("{year}-12-31 23:59:59 EST")))
-  # url <- glue("http://api.openweathermap.org/data/2.5/air_pollution/history?lat={lat}&lon={lon}&start={start_time}&end={end_time}&appid={apiKey}")
-  print(url)
+  # url <- "http://api.openweathermap.org/data/2.5/air_pollution/history?lat={lat}&lon={lon}&start={start_time}&end={end_time}&appid={apiKey}"
+
   url <- "http://api.openweathermap.org/data/2.5/air_pollution/history"
-  query = list(
-    lat = lat,
-    lon = lon,
-
-    start = start_time,
-    end = end_time,
-    appID = apiKey
-
-    
-    
-  )
   
-  response <- VERB("GET", url, query=query)
+  # API Request params
+  params = list(
+    lat = lat, lon = lon,
+    start = start_time, end = end_time,
+    appID = apiKey)
 
-  return(aq_df <- as.data.frame(fromJSON(content(response, "text"))))
+  response <- GET(url, query=params)
+  aq_df <- fromJSON(content(response, "text"))
+  aq_list <- aq_df$list
+  aqi <- mean(aq_list[["main"]][["aqi"]])
+
+  return(aqi)
 }
 
-sample_aq <- lookupAQ(40.72189, 73.978, 2021)
+sample_aq <- lookupAQ(40.7219, -73.9788, 2021)
 
 ```
 
 
 ## Cleaning Air Quality Data
 First, we'll need to pull latitudes and longitudes from our `school_data` dataframe to pass to our `lookupAQ` 
-```{r}
-# TODO: figure out how we want to format return  types 
-
-# Grouping by school and aggregating over year to minimize API calls
-# school_data$Mean.Scale.Score = as.double(school_data$Mean.Scale.Score)
-# school_data <- school_data %>%
-#                 filter(!is.na(Mean.Scale.Score) & Mean.Scale.Score != "s") %>%
-#                 mutate(mean_scaled_score = as.double(Mean.Scale.Score))
-
-head(school_data)
-# school_data$aq <- mapply(FUN=lookupAQ, lat =school_data$lat, lon=school_data$lon, year=school_data$Year)
-```
 
 Looking up Air Quality data for each school in our sample
 ```{r}
 # Calling AQ API for data by school
-aq_lookup <- mapply(FUN=lookupAQ, lat=school_data$lat, lon=school_data$lon,     year=school_data$Year)
+school_sample <- school_data[c(1:10), ]
+
+
+
+aq_lookup <- mapply(FUN=lookupAQ, lat=school_sample$lat, lon=school_sample$lon, year=school_sample$Year)
+
 ```
 
 ```{r}
-library(purrr)
+aq_lookup <- mapply(FUN=lookupAQ, lat=school_data$lat, lon=school_data$lon, year=school_data$Year)
+```
 
-school_sample <- school_data[c(1:10), ] %>%
-                  mutate(lat = round(lat, 4), lon = round(lon, 4))
 
-map_dfr(school_sample$lat, lookupAQ, lon=school_sample$lon, year=school_sample$Year)
+```{r}
+for (i in seq(1:nrow(school_sample))){
+  row <- school_sample[i, ]
+  print(row)
+  
+  # print(row$lat - 40.7219)
+  
+  aq <- lookupAQ(row$lat, row$lon, row$Year)
+  print(aq)
+}
 ```
 
 
