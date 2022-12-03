@@ -77,22 +77,29 @@ school_data <- left_join(tests, school_locs, by="DBN")
 Looking up air quality for school locations in [New York's geographical area](https://www.latlong.net/place/new-york-city-ny-usa-1848.html). Using my free API key from [the Open Weather Map API](https://openweathermap.org/api). Setting this as an environment variable
 ```{r}
 # Reading our API key via environment variable. This will be included in submission for reproduction
-apiKey <- "bdc4c7c62b4bc1c3ed4b23e368d93e8f"#Sys.getenv("OPENWEATHER_API_KEY")
+apiKey <- Sys.getenv("OPENWEATHER_API_KEY")
 
 # TODO: update return type (just aggregated AQ rating)
 lookupAQ <- function(lat, lon, year=2022){
   
   start_time <- as.numeric(as.POSIXct(glue("{year}-01-01 0:00:00 EST")))
   end_time <- as.numeric(as.POSIXct(glue("{year}-12-31 23:59:59 EST")))
-  url <- glue("http://api.openweathermap.org/data/2.5/air_pollution/history?lat={lat}&lon={lon}&start={start_time}&end={end_time}&appid={apiKey}")
+  # url <- glue("http://api.openweathermap.org/data/2.5/air_pollution/history?lat={lat}&lon={lon}&start={start_time}&end={end_time}&appid={apiKey}")
   print(url)
-  
+  url <- "http://api.openweathermap.org/data/2.5/air_pollution/history"
   query = list(
-    appID = apiKey, 
+    lat = lat,
+    lon = lon,
+
+    start = start_time,
+    end = end_time,
+    appID = apiKey
+
+    
     
   )
   
-  response <- VERB("GET", url)
+  response <- VERB("GET", url, query=query)
 
   return(aq_df <- as.data.frame(fromJSON(content(response, "text"))))
 }
