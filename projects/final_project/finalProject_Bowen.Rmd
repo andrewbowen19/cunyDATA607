@@ -35,8 +35,6 @@ tests <- read.csv(dbn_url)
 head(tests)
 ```
 
-
-
 ## Getting School Geospatial Data
 Looking up [school district GIS data from NYC Open Data](https://data.cityofnewyork.us/Education/School-Districts/r8nu-ymqj). School point locations can be found [here](https://data.cityofnewyork.us/Education/School-Point-Locations/jfju-ynrr), we'll download them and unzip the file to get the shp file
 ```{r}
@@ -52,7 +50,7 @@ download.file(school_locs_url, temp)
 unzip(zipfile = temp, exdir = temp2)
 school_locs <- sf::read_sf(temp2)
 ```
-
+## Cleaning School Location Data
 ```{r}
 # Cleaning and re-naming the ATS_CODE column to 
 school_locs <- school_locs %>% 
@@ -81,37 +79,7 @@ school_data <- as.data.frame(left_join(tests, school_locs, by="DBN")) %>%
 
 ## Pulling Air Quality Data for New York City
 
-Looking up air quality for school locations in [New York's geographical area](https://www.latlong.net/place/new-york-city-ny-usa-1848.html). Using my free API key from [the Open Weather Map API](https://openweathermap.org/api). Setting this as an environment variable
-```{r}
-# Reading our API key via environment variable. This will be included in submission for reproduction
-apiKey <- Sys.getenv("OPENWEATHER_API_KEY")
-
-# TODO: update return type (just aggregated AQ rating)
-lookupAQ <- function(lat, lon, year=2022){
-  
-  start_time <- as.numeric(as.POSIXct(glue("{year}-01-01 0:00:00 EST")))
-  end_time <- as.numeric(as.POSIXct(glue("{year}-12-31 23:59:59 EST")))
-  # url <- "http://api.openweathermap.org/data/2.5/air_pollution/history?lat={lat}&lon={lon}&start={start_time}&end={end_time}&appid={apiKey}"
-
-  url <- "http://api.openweathermap.org/data/2.5/air_pollution/history"
-  
-  # API Request params
-  params = list(
-    lat = lat, lon = lon,
-    start = start_time, end = end_time,
-    appID = apiKey)
-
-  response <- GET(url, query=params)
-  aq_df <- fromJSON(content(response, "text"))
-  aq_list <- aq_df$list
-  aqi <- mean(aq_list[["main"]][["aqi"]])
-
-  return(aqi)
-}
-
-sample_aq <- lookupAQ(40.7219, -73.9788, 2011)
-
-```
+Looking up air quality for school locations in [New York's geographical area](https://www.latlong.net/place/new-york-city-ny-usa-1848.html).
 
 
 
@@ -145,13 +113,9 @@ head(nyc_aq)
 ```
 ## Additional AQ Data Cleaning
 ```{r}
-nyc_df <- nyc_aq
-nyc_aq <- nyc_df %>% pivot_wider(., names_from = name, values_from=data_value)
-# %>%
-#                 group_by(borough, year) %>%
-#                 rename("ozone" = "Ozone (O3)", "sulfur_o2" = "Sulfur Dioxide (SO2)") %>%
-#                 # filter(!is.na(ozone) & !is.na(sulfur_o2)) %>%
-#                 summarise(mean_ozone = mean(ozone, na.rm=TRUE), mean_sulfur_o2 = mean(sulfur_o2, na.rm=TRUE))
+nyc_aq <- nyc_aq %>% pivot_wider(., names_from = name, values_from=data_value) %>%
+            rename("ozone" = "Ozone (O3)", "sulfur_o2" = "Sulfur Dioxide (SO2)") %>%
+            mutate(ozone = as.double(ozone), sulfur_o2 = as.double(sulfur_o2))
 ```
 
 
@@ -167,11 +131,62 @@ write.csv(df, "school_aq_data.csv")
 
 ## Data Analysis
 
+Let's get a sense of the distributions for our `ozone` and `sulfer_o2` variables
+```{r dist-ozone-so2}
+bin_width = 0.5
+# Ozone distribution
+ggplot(df, aes(x=ozone)) + geom_histogram(binwidth=bin_width)
+
+# SO2 distribution
+ggplot(df, aes(x=sulfur_o2)) + geom_histogram(binwidth=bin_width)
+```
 
 
+## ANOVA ()
+Running an Analysis of Variance (ANOVA) hypothesis test to see if there's a statistically significant different in ozone levels between boroughs.We'll conduct this test with significance level ($\alpha = 0.05$) and the following hypotheses:
 
+- $H_0$: There is **no** difference in mean ozone (O3) levels between NYC boroughs
 
+- $H_a$: There **is a** difference in mean ozone (O3) levels between NYC boroughs
 
+```{r anova-ozone-by-borough}
+ozone_aov <- aov(ozone ~ borough, data = df )
+summary(ozone_aov)
+```
 
+## ANOVA (SO2)
 
+- $H_0$: There is **no** difference in mean sulfur dioxide (SO2) levels between NYC boroughs
+
+- $H_a$: There **is a** difference in mean sulfur dioxide (SO2) levels between NYC boroughs
+
+```{r anova-so2-by-borough}
+so2_aov <- aov(sulfur_o2 ~ borough, data = df )
+summary(so2_aov)
+```
+
+Making a choropleth map of each borough, colored by mean `ozone` and `sulfur_o2` value, with school locations plotted.
+```{r, message=FALSE, echo=FALSE}
+library(maptools)
+library(ggmap)
+library(tigris)
+library(rgdal)
+library(broom)
+
+r <- GET('http://data.beta.nyc//dataset/0ff93d2d-90ba-457c-9f7e-39e47bf2ac5f/resource/35dd04fb-81b3-479b-a074-a27a37888ce7/download/d085e2f8d0b54d4590b1e7d1f35594c1pediacitiesnycneighborhoods.geojson')
+nyc_neighborhoods <- readOGR(content(r,'text'), 'OGRGeoJSON', verbose = F)
+
+nyc_neighborhoods_df <- broom::tidy(nyc_neighborhoods)
+
+# Plotting schools colored by ozone levels
+ggplot() + 
+  geom_polygon(data=nyc_neighborhoods_df, aes(x=long, y=lat, group=group)) + 
+  geom_point(data=df, aes(x = lon, y=lat, colour=ozone))
+```
+
+```{r}
+ggplot() + 
+  geom_polygon(data=nyc_neighborhoods_df, aes(x=long, y=lat, group=group)) + 
+  geom_point(data=df, aes(x = lon, y=lat, colour=sulfur_o2, fill=sulfur_o2))
+```
 
