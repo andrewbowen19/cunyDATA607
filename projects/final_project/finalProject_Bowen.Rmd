@@ -69,7 +69,14 @@ school_locs <- st_transform(school_locs_sf, crs = 4326 ) %>%
 ## Joining & Cleaning Academic Data
 Let's join our `school_locs` dataframe to our `tests` 
 ```{r}
-school_data <- as.data.frame(left_join(tests, school_locs, by="DBN"))
+#  Adding in borough lookup as well
+school_boro_lookup = data.frame(BORO=c("K", "M", "Q", "R", "X"),
+                                borough=c("Brooklyn", "Manhattan", "Queens", "Staten Island", "Bronx")
+                                )
+school_data <- as.data.frame(left_join(tests, school_locs, by="DBN")) %>%
+                            left_join(., school_boro_lookup, by="BORO") %>%
+                            rename("year" = "Year") %>%
+                            mutate(year = as.character(year))
 ```
 
 ## Pulling Air Quality Data for New York City
@@ -102,48 +109,68 @@ lookupAQ <- function(lat, lon, year=2022){
   return(aqi)
 }
 
-sample_aq <- lookupAQ(40.7219, -73.9788, 2021)
+sample_aq <- lookupAQ(40.7219, -73.9788, 2011)
 
 ```
 
 
-## Cleaning Air Quality Data
-First, we'll need to pull latitudes and longitudes from our `school_data` dataframe to pass to our `lookupAQ` 
 
-Looking up Air Quality data for each school in our sample
+
+## Air quality data
+Using this [NYC Open Data Air Quality Dataset from their API](https://data.cityofnewyork.us/Environment/Air-Quality/c3uy-2p5r). Going to call their API
+
+
+Breaking down air quality data by borough. Air pollution [varies borough-to-borough in New York City](https://vega.github.io/schema/vega-lite/v4.json) so we'll group our data that way. We'll need to add a `borough` column to our Air quality dataset
 ```{r}
-# Calling AQ API for data by school
-school_sample <- school_data[c(1:10), ]
+#  Getting data from API call
+# https://data.cityofnewyork.us/Environment/Air-Quality/c3uy-2p5r
+nyc_open_data_aq_url <- "https://data.cityofnewyork.us/resource/c3uy-2p5r.json"
+nyc_aq <- as.data.frame(fromJSON(nyc_open_data_aq_url))
+
+# Adding in borough lookup code to compare to school data
+# Also adding year column to compare with testing data
+borough_lookup <- data.frame(borough_code = c("1", "2", "3", "4", "5"),
+                    borough=c("Bronx",
+                    "Brooklyn",
+                    "Manhattan",
+                    "Queens",
+                    "Staten Island"))
+nyc_aq <- nyc_aq %>%
+            mutate(borough_code = str_extract(geo_join_id, "^\\d"),
+                   year = str_extract(start_date, "^\\d{4}")) %>%
+            left_join(., borough_lookup, by="borough_code")
 
 
-
-aq_lookup <- mapply(FUN=lookupAQ, lat=school_sample$lat, lon=school_sample$lon, year=school_sample$Year)
-
+head(nyc_aq)
+```
+## Additional AQ Data Cleaning
+```{r}
+nyc_df <- nyc_aq
+nyc_aq <- nyc_df %>% pivot_wider(., names_from = name, values_from=data_value)
+# %>%
+#                 group_by(borough, year) %>%
+#                 rename("ozone" = "Ozone (O3)", "sulfur_o2" = "Sulfur Dioxide (SO2)") %>%
+#                 # filter(!is.na(ozone) & !is.na(sulfur_o2)) %>%
+#                 summarise(mean_ozone = mean(ozone, na.rm=TRUE), mean_sulfur_o2 = mean(sulfur_o2, na.rm=TRUE))
 ```
 
+
+## Joining our Air Quality and Academic
 ```{r}
-aq_lookup <- mapply(FUN=lookupAQ, lat=school_data$lat, lon=school_data$lon, year=school_data$Year)
+df <- left_join(school_data, nyc_aq, by=c("borough", "year"))
 ```
 
-
-```{r}
-for (i in seq(1:nrow(school_sample))){
-  row <- school_sample[i, ]
-  print(row)
-  
-  # print(row$lat - 40.7219)
-  
-  aq <- lookupAQ(row$lat, row$lon, row$Year)
-  print(aq)
-}
-```
-
-
-
-```{r}
+```{r, echo=FALSE, message=FALSE}
 # Writing to CSV file to avoid future API calls in our analysis
-# write.csv("school_aq_data.csv")
+write.csv(df, "school_aq_data.csv")
 ```
+
+## Data Analysis
+
+
+
+
+
 
 
 
